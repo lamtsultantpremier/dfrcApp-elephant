@@ -54,139 +54,103 @@ def distance_par_nuit_jour_m(dt):
 #fin de la fonction
 
 #distance par semaine en Km
-def distance_par_en_semaine_km(dt):
-    dt2=dt.groupby(pd.Grouper(level="Date_Enregistrement",freq="W",sort=True))
+def distance_par_semaine_km(dt):
     distances=[]
-    index=[]
-    date_debut_fin=[]
-    group_name=[]
-    for nom_groupe,groupe in dt2:
-        grouped=groupe.groupby(level="Date_Enregistrement")
-        #Faire la somme des distances de chaque groupe
-        distance=grouped.apply(distance_par_jour_km).sum()
-        #convertir la Timestamps en dateTime puis au format dd/mm/yy
-        date_debut=groupe.index.min().to_pydatetime().date().strftime("%d-%m-%Y")
-        #convertir la Timestamps en dateTime puis au format dd/mm/yy
-        date_fin=groupe.index.max().to_pydatetime().date().strftime("%d-%m-%Y")
-        date_debut_fin.append(date_debut+"/"+date_fin)
-        distances.append(distance)
-        #dataframe=pd.DataFrame(dataframe,columns=[nom_groupe],index=[nom_groupe])
-        dataframe={"Date":date_debut_fin,"distance_parcourue_Km":distances}
-        dataframe=pd.DataFrame(dataframe)
+    date=[]
+    dt=dt.copy().set_index("Date_Enregistrement",drop=False)
+    dt.index=pd.to_datetime(dt.index)
+    dt=dt[["Longitude","Latitude"]]
+    dt2=dt.groupby(pd.Grouper(level="Date_Enregistrement",freq="W",sort=True))
+    for index,row in dt2:
+        if not row.empty:
+           distance=distance_par_jour_km(row)
+           distances.append(distance)
+           date.append(index)
+    dataframe=pd.DataFrame({"Date":date,"distance":distances})
     return dataframe
 #fin de la fonction
 
 #distance par semaine en mettre
-def distance_par_en_semaine_metre(dt):
-    dt2=dt.groupby(pd.Grouper(level="Date_Enregistrement",freq="W",sort=True))
+def distance_par_semaine_metre(dt):
     distances=[]
-    index=[]
-    date_debut_fin=[]
-    group_name=[]
-    for nom_groupe,groupe in dt2:
-        grouped=groupe.groupby(level="Date_Enregistrement")
-        #Faire la somme des distances de chaque groupe
-        distance=grouped.apply(distance_par_jour_metre).sum()
-        #convertir la Timestamps en dateTime puis au format dd/mm/yy
-        date_debut=groupe.index.min().to_pydatetime().date().strftime("%d-%m-%Y")
-        #convertir la Timestamps en dateTime puis au format dd/mm/yy
-        date_fin=groupe.index.max().to_pydatetime().date().strftime("%d-%m-%Y")
-        date_debut_fin.append(date_debut+"/"+date_fin)
-        distances.append(distance)
-        #dataframe=pd.DataFrame(dataframe,columns=[nom_groupe],index=[nom_groupe])
-        dataframe={"Date":date_debut_fin,"distance_parcourue_Metre":distances}
-        dataframe=pd.DataFrame(dataframe)
+    date=[]
+    dt=dt.copy().set_index("Date_Enregistrement",drop=False)
+    dt.index=pd.to_datetime(dt.index)
+    dt=dt[["Longitude","Latitude"]]
+    dt2=dt.groupby(pd.Grouper(level="Date_Enregistrement",freq="W",sort=True))
+    for index,row in dt2:
+        if not row.empty:
+           distance=distance_par_jour_metre(row)
+           distances.append(distance)
+           date.append(index)
+    dataframe=pd.DataFrame({"Date":date,"distance":distances})
     return dataframe
 #fin de la fonction
 
 #distance par mois en metre
-def distance_par_en_mois_metre(dt):
-    dt2=dt.groupby(pd.Grouper(level="Date_Enregistrement",freq="M",sort=True))
+def distance_par_mois_metre(dt):
     distances=[]
-    index=[]
-    date_debut_fin=[]
-    group_name=[]
-    for nom_groupe,groupe in dt2:
-        grouped=groupe.groupby(level="Date_Enregistrement")
-        #Faire la somme des distances de chaque groupe
-        distance=grouped.apply(distance_par_jour_metre).sum()
-        #convertir la Timestamps en dateTime puis au format dd/mm/yy
-        date_debut=groupe.index.min().to_pydatetime().date().strftime("%d-%m-%Y")
-        #convertir la Timestamps en dateTime puis au format dd/mm/yy
-        date_fin=groupe.index.max().to_pydatetime().date().strftime("%d-%m-%Y")
-        date_debut_fin.append(date_debut+"/"+date_fin)
-        distances.append(distance)
-        #dataframe=pd.DataFrame(dataframe,columns=[nom_groupe],index=[nom_groupe])
-        dataframe={"Date":date_debut_fin,"distance_parcourue_Metre":distances}
-        dataframe=pd.DataFrame(dataframe)
+    date=[]
+    dt=dt.copy().set_index("Date_Enregistrement",drop=False)
+    dt.index=pd.to_datetime(dt.index)
+    dt=dt[["Longitude","Latitude"]]
+    dt2=dt.groupby(pd.Grouper(level="Date_Enregistrement",freq="M",sort=True))
+    for index,row in dt2:
+        if not row.empty:
+           distance=distance_par_jour_metre(row)
+           distances.append(distance)
+           date.append(index)
+    dataframe=pd.DataFrame({"Date":date,"distance":distances})
     return dataframe
 #fin de la fonction
 
 #distance par mois en km
-def distance_par_en_mois_km(dt):
-    dt2=dt.groupby(pd.Grouper(level="Date_Enregistrement",freq="M",sort=True))
+def distance_par_mois_km(dt):
     distances=[]
-    index=[]
-    date_debut_fin=[]
-    group_name=[]
-    for nom_groupe,groupe in dt2:
-        grouped=groupe.groupby(level="Date_Enregistrement")
-        #Faire la somme des distances de chaque groupe
-        distance=grouped.apply(distance_par_jour_km).sum()
-        #convertir la Timestamps en dateTime puis au format dd/mm/yy
-        date_debut=groupe.index.min().to_pydatetime().date().strftime("%d-%m-%Y")
-        #convertir la Timestamps en dateTime puis au format dd/mm/yy
-        date_fin=groupe.index.max().to_pydatetime().date().strftime("%d-%m-%Y")
-        date_debut_fin.append(date_debut+"/"+date_fin)
-        distances.append(distance)
-        #dataframe=pd.DataFrame(dataframe,columns=[nom_groupe],index=[nom_groupe])
-        dataframe={"Date":date_debut_fin,"distance_parcourue_Km":distances}
-        dataframe=pd.DataFrame(dataframe)
+    date=[]
+    dt=dt.copy().set_index("Date_Enregistrement",drop=False)
+    dt.index=pd.to_datetime(dt.index)
+    dt=dt[["Longitude","Latitude"]]
+    dt2=dt.groupby(pd.Grouper(level="Date_Enregistrement",freq="M",sort=True))
+    for index,row in dt2:
+        if not row.empty:
+           distance=distance_par_jour_km(row)
+           distances.append(distance)
+           date.append(index)
+    dataframe=pd.DataFrame({"Date":date,"distance":distances})
     return dataframe
 #fin de la fonction
 
 #distance parcourue par Annee en Kilometre
-def distance_par_en_annee_km(dt):
-    dt2=dt.groupby(pd.Grouper(level="Date_Enregistrement",freq="Y",sort=True))
+def distance_par_annee_km(dt):
     distances=[]
-    index=[]
-    date_debut_fin=[]
-    group_name=[]
-    for nom_groupe,groupe in dt2:
-        grouped=groupe.groupby(level="Date_Enregistrement")
-        #Faire la somme des distances de chaque groupe
-        distance=grouped.apply(distance_par_jour_km).sum()
-        #convertir la Timestamps en dateTime puis au format dd/mm/yy
-        date_debut=groupe.index.min().to_pydatetime().date().strftime("%d-%m-%Y")
-        #convertir la Timestamps en dateTime puis au format dd/mm/yy
-        date_fin=groupe.index.max().to_pydatetime().date().strftime("%d-%m-%Y")
-        date_debut_fin.append(date_debut+"/"+date_fin)
-        distances.append(distance)
-        #dataframe=pd.DataFrame(dataframe,columns=[nom_groupe],index=[nom_groupe])
-        dataframe={"Date":date_debut_fin,"distance_parcourue_Km":distances}
-        dataframe=pd.DataFrame(dataframe)
+    date=[]
+    dt=dt.copy().set_index("Date_Enregistrement",drop=False)
+    dt.index=pd.to_datetime(dt.index)
+    dt=dt[["Longitude","Latitude"]]
+    dt2=dt.groupby(pd.Grouper(level="Date_Enregistrement",freq="Y",sort=True))
+    for index,row in dt2:
+        if not row.empty:
+           distance=distance_par_jour_km(row)
+           distances.append(distance)
+           date.append(index)
+    dataframe=pd.DataFrame({"Date":date,"distance":distances})
     return dataframe
 #fin de la fonction
 
-def distance_par_en_annee_metre(dt):
-    dt2=dt.groupby(pd.Grouper(level="Date_Enregistrement",freq="Y",sort=True))
+def distance_par_annee_metre(dt):
     distances=[]
-    index=[]
-    date_debut_fin=[]
-    group_name=[]
-    for nom_groupe,groupe in dt2:
-        grouped=groupe.groupby(level="Date_Enregistrement")
-        #Faire la somme des distances de chaque groupe
-        distance=grouped.apply(distance_par_jour_metre).sum()
-        #convertir la Timestamps en dateTime puis au format dd/mm/yy
-        date_debut=groupe.index.min().to_pydatetime().date().strftime("%d-%m-%Y")
-        #convertir la Timestamps en dateTime puis au format dd/mm/yy
-        date_fin=groupe.index.max().to_pydatetime().date().strftime("%d-%m-%Y")
-        date_debut_fin.append(date_debut+"/"+date_fin)
-        distances.append(distance)
-        #dataframe=pd.DataFrame(dataframe,columns=[nom_groupe],index=[nom_groupe])
-        dataframe={"Date":date_debut_fin,"distance_parcourue_Metre":distances}
-        dataframe=pd.DataFrame(dataframe)
+    date=[]
+    dt=dt.copy().set_index("Date_Enregistrement",drop=False)
+    dt.index=pd.to_datetime(dt.index)
+    dt=dt[["Longitude","Latitude"]]
+    dt2=dt.groupby(pd.Grouper(level="Date_Enregistrement",freq="Y",sort=True))
+    for index,row in dt2:
+        if not row.empty:
+           distance=distance_par_jour_metre(row)
+           distances.append(distance)
+           date.append(index)
+    dataframe=pd.DataFrame({"Date":date,"distance":distances})
     return dataframe
 #fin de la fonction
 

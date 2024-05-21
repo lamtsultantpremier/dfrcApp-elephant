@@ -13,7 +13,7 @@ def calcul_angle(lat1,lon1,lat2,lon2):
     return azimuth_deg
 #Fin de la fonction
 #calcule de la direction par second
-def calcule_direction_par_semaine(dataframe):
+def direction_par_semaine(dataframe):
     coordonnes={"date":[],"point_depart":[],"point_arrive":[],"Angle":[],"direction":[]}
     b=pd.DataFrame(dataframe.copy()[["Date_Enregistrement","Heure_Enregistrement","Longitude","Latitude"]]).reset_index(drop=True)
     b.set_index('Date_Enregistrement',drop=False,inplace=True)
@@ -47,7 +47,7 @@ def calcule_direction_par_semaine(dataframe):
 #fin de la fonction
 
 #direction chaque heure
-def direction_chaque_heure(dataframe):
+def direction_par_heure(dataframe):
     coordonnes={"date":[],"point_depart":[],"point_arrive":[],"Angle":[],"direction":[]}
     b=pd.DataFrame(dataframe.copy()[["Date_Enregistrement","Heure_Enregistrement","Longitude","Latitude"]]).reset_index(drop=True)
     c=b.groupby(pd.Grouper(key="Date_Enregistrement",sort=False))
@@ -78,3 +78,57 @@ def direction_chaque_heure(dataframe):
     coordonnes=pd.DataFrame(coordonnes)
     return coordonnes
 #fin de la direction
+#mettre la longitude en Dégré-minute-second
+def put_long_to_DMS(long):
+    long=float(long)
+    degre_decimal=long
+    degre=int(degre_decimal)
+    minute_decimal=(degre_decimal-degre)*60
+    minute=int(minute_decimal)
+    second_decimal=(minute_decimal-minute)*60
+    second=int(second_decimal)
+    if(long>0):
+        cardinal_point="EST"
+        result=f"{degre}°{minute}'{second} {cardinal_point}"
+    else:
+        cardinal_point="OUEST"
+        degre=abs(degre)
+        minute=abs(minute)
+        second=abs(second)
+        result=f"{degre}°{minute}'{second} {cardinal_point}"
+    return result
+#fin de la fonction
+
+#mettre la lattitude en Dégré-Minute-Seconde
+def put_lat_to_DMS(lat):
+    lat=float(lat)
+    degre_decimal=lat
+    degre=int(degre_decimal)
+    minute_decimal=(degre_decimal-degre)*60
+    minute=int(minute_decimal)
+    second_decimal=(minute_decimal-minute)*60
+    second=int(second_decimal)
+    if(lat>0):
+        cardinal_point="NORD"
+        result=f"{degre}°{minute}'{second} {cardinal_point}"
+    else:
+        cardinal_point="SUD"
+        degre=abs(degre)
+        minute=abs(minute)
+        second=abs(second)
+        result=f"{degre}°{minute}'{second} {cardinal_point}"
+    return result
+#fin de la fonction
+
+#convertir les cordonnées en DMS
+def convert_to_DMS(df):
+    df_dms=pd.DataFrame(df.copy()[["Date_Enregistrement","Heure_Enregistrement","Latitude","Longitude"]])
+    for index,row in df_dms.iterrows():     
+        lat_dms=put_lat_to_DMS(row["Latitude"])
+        long_dms=put_long_to_DMS(row["Longitude"])
+        df_dms.loc[index,"Latitude_DMS"]=lat_dms
+        df_dms.loc[index,"Longitude_DMS"]=long_dms
+        #df_dms["Latitude_DMS"]=lat_dms
+        #df_dms["Longitude_DMS"]=long_dms
+    return df_dms
+#fin de la fonction

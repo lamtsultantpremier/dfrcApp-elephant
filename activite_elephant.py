@@ -92,8 +92,8 @@ def Activite_elephant_m(df):
 def duree_marche_repos_km(dataframe):
     import datetime
     duree_activite=Activite_elephant_km(dataframe)
-    duree=duree_activite.groupby(by=["date_dep","status_deplacement"]).agg({"distance":"sum","duree_transmition":"sum"})
-    duree.rename(columns={"duree_transmition":"duree"},inplace=True)
+    duree=duree_activite.groupby(by=["date_dep","status_deplacement"]).agg({"distance":"sum","duree_activite":"sum"})
+    duree.rename(columns={"duree_activite":"duree"},inplace=True)
     duree.sort_values(by="date_dep",ascending=False)
     return duree
 #fin de la fonction
