@@ -1,5 +1,5 @@
 import pandas as pd
-from periode import definir_periode_elephant
+from fonctionnalite.periode import definir_periode_elephant
 def traier_fichier(fichier):
     df=pd.read_csv(fichier)
     #Creation de la dataFrame à l'aide du fichier csv avec Pandas
