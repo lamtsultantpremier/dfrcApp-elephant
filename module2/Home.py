@@ -6,6 +6,9 @@ from fonctionnalite.traitement import traier_fichier
 from streamlit_option_menu import option_menu
 from fonctionnalite.distance import distance_par_semaine_km,distance_par_mois_km,distance_jour_km,distance_par_annee_km
 from io import StringIO
+import locale
+#definir la date au format francais
+locale.setlocale(locale.LC_TIME,"fr_FR.UTF-8")
 st.set_page_config(page_title="EarthRangers",page_icon="🐘",layout="wide")
 with st.sidebar:
     st.header('Navigation')
@@ -54,7 +57,7 @@ if infos=="Distance parcourue":
             distance_jour=distance_jour_km(df)
             st.dataframe(distance_jour)
         with col2.container(border=True):
-            fig=px.line(distance_jour,x="Date",y="distance",width=500,height=400,title="Distance par Jour")
+            fig=px.line(distance_jour,x="Date",y="distance",width=500,height=500,title="Distance par Jour")
             st.plotly_chart(fig,selection_mode="points")
     if option_selected=="Distance par Semaine":
         distance_semaine=distance_par_semaine_km(df)
@@ -71,16 +74,14 @@ if infos=="Distance parcourue":
         with col1:
             st.subheader("Distance par Mois")
             st.dataframe(distance_mois)
-        with col2.container(border=True):
+        with col2.container(height=600,border=True):
             first_record=distance_mois.head(1)
             last_record=distance_mois.tail(1)
             date_debut=pd.to_datetime(first_record["Date"]).dt.date[0]
             date_fin=pd.to_datetime(last_record["Date"]).dt.date[len(distance_mois)-1]
             date_debut_aff=date_debut.strftime("%d %b %Y")
-            date_fin_aff=date_fin.strftime("%d %b %y")
-            st.write((date_debut_aff))
-            st.write(date_fin_aff)
-            fig=px.bar(distance_mois,x="Date",y="distance",width=500,height=450)
+            date_fin_aff=date_fin.strftime("%d %b %Y")
+            fig=px.bar(distance_mois,x="Date",y="distance",width=500,height=500,title=f"Courbe des distances du {date_debut_aff} au {date_fin_aff}",labels={"distance":"Distance par Mois"})
             st.plotly_chart(fig,selection_mode="points")
     if option_selected=="Distance par Année":
         distance_annee=distance_par_annee_km(df)
@@ -88,8 +89,8 @@ if infos=="Distance parcourue":
         with col1:
             st.subheader("Distance par Année")
             st.dataframe(distance_annee)
-        with col2.container(border=True):
-            fig=px.bar(distance_annee,x="Date",y="distance",width=250,height=400,title="Distance par Année")
+        with col2.container(height=300,border=True):
+            fig=px.bar(distance_annee,x="Date",y="distance",width=200,height=300)
             st.plotly_chart(fig)
 #st-emotion-cache-1d4lk37
 #col1, col2,col3,col4,col5= st.columns(5)
