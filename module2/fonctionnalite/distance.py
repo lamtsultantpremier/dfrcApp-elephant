@@ -56,6 +56,7 @@ def distance_jour_km(dt):
 
 #distance par jour et nuit en kilometre retourne un dataframe multi-index
 def distance_par_nuit_jour_km(dt):
+    dt.sort_values(by="Date_Enregistrement",ascending=False,inplace=True)
     dt1=dt.groupby(by=["Date_Enregistrement","temps"]).apply(distance_par_jour_km)
     dt1=pd.DataFrame(dt1)
     dt1.rename(columns={0:"Distance_parcourue_km"},inplace=True)
@@ -145,7 +146,7 @@ def distance_par_annee_km(dt):
     dt=dt.copy().set_index("Date_Enregistrement",drop=False)
     dt.index=pd.to_datetime(dt.index)
     dt=dt[["Longitude","Latitude"]]
-    dt2=dt.groupby(pd.Grouper(level="Date_Enregistrement",freq="Y",sort=True))
+    dt2=dt.groupby(pd.Grouper(level="Date_Enregistrement",freq="YE",sort=True))
     for index,row in dt2:
         if not row.empty:
            distance=distance_par_jour_km(row)

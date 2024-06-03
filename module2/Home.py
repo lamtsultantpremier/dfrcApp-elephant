@@ -2,9 +2,10 @@
 import pandas as pd
 import streamlit as st
 import plotly.express as px
+import matplotlib.pyplot as plt
 from fonctionnalite.traitement import traier_fichier
 from streamlit_option_menu import option_menu
-from fonctionnalite.distance import distance_par_semaine_km,distance_par_mois_km,distance_jour_km,distance_par_annee_km
+from fonctionnalite.distance import distance_par_semaine_km,distance_par_mois_km,distance_jour_km,distance_par_annee_km,distance_par_nuit_jour_km
 from io import StringIO
 import locale
 #definir la date au format francais
@@ -57,7 +58,7 @@ if infos=="Distance parcourue":
             distance_jour=distance_jour_km(df)
             st.dataframe(distance_jour)
         with col2.container(border=True):
-            fig=px.line(distance_jour,x="Date",y="distance",width=500,height=500,title="Distance par Jour")
+            fig=px.line(distance_jour,x="Date",y="distance",width=600,height=500,title="Distance par Jour")
             st.plotly_chart(fig,selection_mode="points")
     if option_selected=="Distance par Semaine":
         distance_semaine=distance_par_semaine_km(df)
@@ -74,7 +75,7 @@ if infos=="Distance parcourue":
         with col1:
             st.subheader("Distance par Mois")
             st.dataframe(distance_mois)
-        with col2.container(height=600,border=True):
+        with col2.container(border=True):
             first_record=distance_mois.head(1)
             last_record=distance_mois.tail(1)
             date_debut=pd.to_datetime(first_record["Date"]).dt.date[0]
@@ -89,9 +90,28 @@ if infos=="Distance parcourue":
         with col1:
             st.subheader("Distance par Année")
             st.dataframe(distance_annee)
-        with col2.container(height=300,border=True):
+        with col2.container(border=True): 
             fig=px.bar(distance_annee,x="Date",y="distance",width=200,height=300)
             st.plotly_chart(fig)
+    distance_nuit_jour=st.radio("Distance de Jour et de Nuit",["","Distance nuit et Jour"],horizontal=True)
+    if distance_nuit_jour!="Distance nuit et Jour":
+        with st.expander("Choisir une date"):
+            options=["12-10-2011","12-10-2015","12-10-2018","12-10-2014"]
+            st.selectbox("Choisir une Date",options=options,index=None,placeholder="Choisir une date")
+    else:
+        distance_nuit_jour=distance_par_nuit_jour_km(df)
+        col1,col2=st.columns(2)
+        with col1:
+            st.dataframe(distance_nuit_jour)
+        with col2.container(border=True):
+             distance_nuit_jour_unstack=distance_nuit_jour.unstack(level="temps")
+             distance_nuit_jour_formated=distance_nuit_jour_unstack["Distance_parcourue_km"]
+             fig,ax=plt.subplots(figsize=(6,11))
+             distance_nuit_jour_formated.plot(kind="barh",ax=ax,color={"Jour":"blue","Nuit":"orange"},grid=False)
+             ax.set_xlabel('Distance_parcourue_Km')
+             ax.set_ylabel('Date')
+             st.pyplot(fig)
+             
 #st-emotion-cache-1d4lk37
 #col1, col2,col3,col4,col5= st.columns(5)
 
