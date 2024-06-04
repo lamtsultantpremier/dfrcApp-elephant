@@ -95,9 +95,50 @@ if infos=="Distance parcourue":
             st.plotly_chart(fig)
     distance_nuit_jour=st.radio("Distance de Jour et de Nuit",["","Distance nuit et Jour"],horizontal=True)
     if distance_nuit_jour!="Distance nuit et Jour":
-        with st.expander("Choisir une date"):
-            options=["12-10-2011","12-10-2015","12-10-2018","12-10-2014"]
-            st.selectbox("Choisir une Date",options=options,index=None,placeholder="Choisir une date")
+            distance_nuit_jour=distance_par_nuit_jour_km(df)
+            distance_nuit_jour_unstack=distance_nuit_jour.unstack()
+            distance_nuit_jour_formated=distance_nuit_jour_unstack["Distance_parcourue_km"]
+            dates=[]
+            for index,rows in distance_nuit_jour_formated.iterrows():
+                print(distance_nuit_jour_formated.loc[[index]])
+                dates.append(index)
+            with st.expander("Choisir une date"):
+                choix=st.selectbox("",dates,index=None,placeholder="Choisir une Date")
+            ##on est ICI
+            if choix:
+                color_sequences=["orange","yellow"]
+                df=distance_nuit_jour_formated.loc[[choix]]
+                col1,col2,col3=st.columns(3)
+                col4,col5,col6=st.columns(3)
+                dist_nuit=df["Nuit"].values[0]
+                distance_jour=df["Jour"].values[0]
+                data_sector={"Distance":[dist_nuit,distance_jour],"Type":["Nuit","Jour"]}
+                df_sector=pd.DataFrame(data_sector)
+                with col1:
+                    st.text("Distance de Jour et de Nuit")
+                    st.dataframe(df)
+                with col3:
+                    st.text("Distance")
+                    st.dataframe(df_sector)
+                form=px.pie(df_sector,names="Type",values="Distance",title="Distance Parcourue de Jour et de Nuit",width=500,height=500,color_discrete_sequence=["orange","gray"])
+                with col5:
+                    st.plotly_chart(form)
+                options_compare=["Comparaison entre deux Date",""]
+                choix1=st.radio("",options_compare,horizontal=True)
+                if choix1=="Comparaison entre deux Date":
+                    col1,col2,col3=st.columns(3)
+                    with col1:
+                        with st.expander("Choisi la prémière date"):
+                            choix_date1=st.selectbox("Choisir une date",dates,index=None,placeholder="Choisissez la Premiere Date")
+                            #selectionner la dataframe resultant de la date1
+                            df_date1=distance_nuit_jour.loc[[choix_date1]]
+                        st.dataframe(df_date1)
+                    with col3:
+                        with st.expander("Choisi la deuxieme date"):
+                            choix_date2=st.selectbox("Choisir une date",dates,index=None,placeholder="Choisissez la Deuxieme Date")
+                            #selectionner la dataframe resultante de la date2
+                            df_date2=distance_nuit_jour.loc[[choix_date2]]
+                        st.dataframe(df_date2)                     
     else:
         distance_nuit_jour=distance_par_nuit_jour_km(df)
         col1,col2=st.columns(2)

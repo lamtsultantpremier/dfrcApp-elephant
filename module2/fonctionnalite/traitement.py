@@ -60,4 +60,3 @@ def traier_fichier(fichier):
     df.sort_values(by=["Date_Enregistrement","Heure_Enregistrement"],ascending=False,inplace=True)
     df["temps"]=df["Heure_Enregistrement"].apply( definir_periode_elephant)
     return df
-
