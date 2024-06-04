@@ -123,6 +123,8 @@ if infos=="Distance parcourue":
                 form=px.pie(df_sector,names="Type",values="Distance",title="Distance Parcourue de Jour et de Nuit",width=500,height=500,color_discrete_sequence=["orange","gray"])
                 with col5:
                     st.plotly_chart(form)
+                
+                #Debut de la partie concernant la comparaison entre deux date
                 options_compare=["Comparaison entre deux Date",""]
                 choix1=st.radio("",options_compare,horizontal=True)
                 if choix1=="Comparaison entre deux Date":
@@ -130,15 +132,55 @@ if infos=="Distance parcourue":
                     with col1:
                         with st.expander("Choisi la prémière date"):
                             choix_date1=st.selectbox("Choisir une date",dates,index=None,placeholder="Choisissez la Premiere Date")
+                            if choix_date1:
+                            #Information concernant la premiere Liste déroulante
                             #selectionner la dataframe resultant de la date1
-                            df_date1=distance_nuit_jour.loc[[choix_date1]]
-                        st.dataframe(df_date1)
+                                df_date1=distance_nuit_jour_formated.loc[[choix_date1]]
+                                dist_nuit_date1=df_date1["Nuit"].values[0]
+                                dist_jour_date1=df_date1["Jour"].values[0]
+                                st.session_state["nuit1"]=dist_nuit_date1
+                                st.session_state["jour1"]=dist_jour_date1
+                                data_sector_date1={"Type":["Nuit","Jour"],"Distance":[dist_nuit_date1,dist_jour_date1]}
+                                df_sector_date1=pd.DataFrame(data_sector_date1)
+                                st.dataframe(df_sector_date1)
+                                form_date1=px.pie(df_sector_date1,names="Type",values="Distance",color_discrete_sequence=["blue","green"],width=430,height=300)
+                                st.plotly_chart(form_date1)
+
                     with col3:
                         with st.expander("Choisi la deuxieme date"):
                             choix_date2=st.selectbox("Choisir une date",dates,index=None,placeholder="Choisissez la Deuxieme Date")
+                            if choix_date2:
                             #selectionner la dataframe resultante de la date2
-                            df_date2=distance_nuit_jour.loc[[choix_date2]]
-                        st.dataframe(df_date2)                     
+                                df_date2=distance_nuit_jour_formated.loc[[choix_date2]]
+                                dist_nuit_date2=df_date2["Nuit"].values[0]
+                                dist_jour_date2=df_date2["Jour"].values[0]
+                                st.session_state["nuit2"]=dist_nuit_date2
+                                st.session_state["jour2"]=dist_jour_date2
+                                data_sector_date2={"Type":["Nuit","Jour"],"Distance":[dist_nuit_date2,dist_jour_date2]}
+                                df_sector_date2=pd.DataFrame(data_sector_date2)
+                                st.dataframe(df_sector_date2)
+                                form_date2=px.pie(df_sector_date2,names="Type",values="Distance",color_discrete_sequence=["yellow","gray"],width=430,height=300)
+                                st.plotly_chart(form_date2)     
+                    with col2:
+                        if st.session_state["nuit2"]!=None:
+                            diff_nuit=st.session_state["nuit2"]-st.session_state["nuit1"]
+                            diff_jour=st.session_state["jour2"]-st.session_state["jour1"]
+                            if diff_nuit<0 or diff_jour<0 or (diff_jour<0 and diff_nuit<0):
+                                st.write("La difference de nuit ou de jour est inferieure à Zero")
+                                diff_dict={"Type":["Nuit","Jour"],"Distance":[diff_nuit,diff_jour]}
+                                df_diff=pd.DataFrame(diff_dict)
+                                st.dataframe(df_diff)
+                            else:
+                                diff_dict={"Type":["Nuit","Jour"],"Distance":[diff_nuit,diff_jour]}
+                                df_diff=pd.DataFrame(diff_dict)
+                                st.dataframe(df_diff)
+                                form_diff=px.pie(df_diff,values="Distance",names="Type",color_discrete_sequence=["orange","gray"],width=200,height=200)
+                                st.plotly_chart(form_diff)
+                else:
+                    st.session_state["nuit2"]=None
+                    st.session_state["nuit1"]=None
+                    st.session_state["jour1"]=None
+                    st.session_state["jour2"]=None         
     else:
         distance_nuit_jour=distance_par_nuit_jour_km(df)
         col1,col2=st.columns(2)
