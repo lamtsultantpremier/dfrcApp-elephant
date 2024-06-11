@@ -18,6 +18,22 @@ def distance_par_jour_km(dataframe):
     return dist_total
 #Fin de la fonction
 
+def distance_par_jour_m(dataframe):
+    #conversion du dataframe en numeric
+    dist_total=0
+    for i in range(1,len(dataframe)):
+        prev_long=dataframe["Longitude"].iloc[i-1]
+        prev_lati=dataframe["Latitude"].iloc[i-1]
+        prev_pos=(prev_lati,prev_long)
+        cur_long=dataframe["Longitude"].iloc[i]
+        cur_lati=dataframe["Latitude"].iloc[i]
+        cur_pos=(cur_lati,cur_long)
+        distance=geodesic(prev_pos,cur_pos).m
+        #distance total de chaque groupe
+        dist_total+=distance
+    return dist_total
+
+
 def distance_par_jour_metre(dataframe):
     #conversion du dataframe en numeric
     dataframe["Longitude"]=pd.to_numeric(dataframe["Longitude"],errors='coerce')
@@ -36,6 +52,24 @@ def distance_par_jour_metre(dataframe):
     dist_total=sum(distances)
     return dist_total
 #Fin de la fonction
+
+
+#permet de définir la distance par jour en metre en fonction des coordonnées
+def distance_par_jour_m(dataframe):
+    #conversion du dataframe en numeric
+    dist_total=0
+    for i in range(1,len(dataframe)):
+        prev_long=dataframe["Longitude"].iloc[i-1]
+        prev_lati=dataframe["Latitude"].iloc[i-1]
+        prev_pos=(prev_lati,prev_long)
+        cur_long=dataframe["Longitude"].iloc[i]
+        cur_lati=dataframe["Latitude"].iloc[i]
+        cur_pos=(cur_lati,cur_long)
+        distance=geodesic(prev_pos,cur_pos).m
+        #distance total de chaque groupe
+        dist_total+=distance
+    return dist_total
+
 
 #distance Jour en Km
 def distance_jour_km(dt):

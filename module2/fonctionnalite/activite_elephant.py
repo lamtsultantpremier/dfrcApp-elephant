@@ -1,6 +1,7 @@
 import pandas as pd
 from geopy.distance import geodesic
 import math
+from fonctionnalite.distance import distance_par_jour_metre,distance_par_jour_m,distance_par_jour_km
 #defini si l'éléphant est en Marche ou à l'arrêt en Km et prend en paramètre le DataFrame Originel et aussi sa vitesse
 def Activite_elephant_km(df):
     import datetime
@@ -97,3 +98,55 @@ def duree_marche_repos_km(dataframe):
     duree.sort_values(by="date_dep",ascending=False)
     return duree
 #fin de la fonction
+ 
+ #vitesse par Jour effectuerpar un éléphant
+def vitesse_jour_km(df):
+    import datetime
+    vitesse=0.0
+    distance=[]
+    distances={"index":[],"heure_depart":[],"heure_arrive":[],"distance_km":[],"duree_heure":[],"duree_sec":[],"vitesse":[]}
+    df_change=df.set_index("Date_Enregistrement",drop=True)
+    df_change.index=pd.to_datetime(df_change.index)
+    df_grouped=df_change.groupby(pd.Grouper(level="Date_Enregistrement",freq="D"))
+    for key,group in df_grouped:
+        if not group.empty:
+            heure_arrive=group.head(1)["Heure_Enregistrement"].reset_index(drop=True)[0]
+            heure_depart=group.tail(1)["Heure_Enregistrement"].reset_index(drop=True)[0]
+            dist=distance_par_jour_km(group)
+            index=key.date()
+            time1=heure_depart
+            #Selectionner l'heure de départ
+            time2=heure_arrive
+            #Recuperer la date d'aujourdhui
+            to_day=datetime.date.today()
+            datetime1 = datetime.datetime.combine(to_day, time1)
+            datetime2 = datetime.datetime.combine(to_day, time2)
+            datetime1_delta=datetime.timedelta(hours=datetime1.hour,minutes=datetime1.minute,seconds=datetime1.second)
+            datetime2_delta=datetime.timedelta(hours=datetime2.hour,minutes=datetime2.minute,seconds=datetime2.second)
+            date1_delta_seconds=datetime1_delta.total_seconds()
+            date2_delta_seconds=datetime2_delta.total_seconds()
+            difference_timedelta_seconds=(date2_delta_seconds-date1_delta_seconds)%(24*3600)
+            difference_timedelta=datetime.timedelta(seconds=difference_timedelta_seconds)
+            #convertir la duree en seconds pour déterminer la vitesse
+            difference_timedelta_total_seconds=difference_timedelta.total_seconds()
+            #mettre la duree en chaine de caractere
+            heure=int(difference_timedelta_total_seconds//3600)
+            minutes=int((difference_timedelta_total_seconds % 3600)//60)
+            secondes=int((difference_timedelta_total_seconds%60))
+            duree_heure=f"{heure:02d}:{minutes:02d}:{secondes:02d}"
+            #fin
+            
+            temps_heure=difference_timedelta_total_seconds/3600
+            #vitesse=dist/difference_timedelta_total_seconds
+            if difference_timedelta_total_seconds!=0.0:
+                vitesse=dist/temps_heure
+            distances["index"].append(index)
+            distances["heure_depart"].append(heure_depart)
+            distances["heure_arrive"].append(heure_arrive)
+            distances["distance_km"].append(dist)
+            distances["vitesse"].append(vitesse)
+            distances["duree_heure"].append(duree_heure)
+            distances["duree_sec"].append(difference_timedelta_total_seconds)
+            #distances["vitesse"].append(vitesse)
+            df=pd.DataFrame(data=distances,index=distances["index"])
+    return  df

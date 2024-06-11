@@ -5,11 +5,16 @@ import plotly.express as px
 import matplotlib.pyplot as plt
 from fonctionnalite.traitement import traier_fichier
 from streamlit_option_menu import option_menu
-from fonctionnalite.distance import distance_par_semaine_km,distance_par_mois_km,distance_jour_km,distance_par_annee_km,distance_par_nuit_jour_km
+from fonctionnalite.distance import distance_par_semaine_km,distance_par_mois_km,distance_jour_km,distance_par_annee_km,distance_par_nuit_jour_km,distance_par_jour_metre
+from fonctionnalite.activite_elephant import vitesse_jour_km
 from io import StringIO
 import locale
+import sys
+import plotly.graph_objects as go
+
 #definir la date au format francais
 locale.setlocale(locale.LC_TIME,"fr_FR.UTF-8")
+sys.stdout.reconfigure(encoding='utf-8')
 st.set_page_config(page_title="EarthRangers",page_icon="🐘",layout="wide")
 with st.sidebar:
     st.header('Navigation')
@@ -47,6 +52,7 @@ if "chemin_fichier" in st.session_state:
     df=df.sort_values(by="Date_Enregistrement",ascending=False)
     st.session_state["df"]=df
     st.dataframe(df)
+    st.write(f"Source : EarthRanger avec {len(df)} Données")
 if infos=="Distance parcourue":
     options_distances=["Distance par Jour","Distance par Semaine","Distance par Mois","Distance par Année"]
     option_selected=st.radio("Distance",options_distances,horizontal=True)
@@ -145,7 +151,6 @@ if infos=="Distance parcourue":
                                 st.dataframe(df_sector_date1)
                                 form_date1=px.pie(df_sector_date1,names="Type",values="Distance",color_discrete_sequence=["blue","green"],width=430,height=300)
                                 st.plotly_chart(form_date1)
-
                     with col3:
                         with st.expander("Choisi la deuxieme date"):
                             choix_date2=st.selectbox("Choisir une date",dates,index=None,placeholder="Choisissez la Deuxieme Date")
@@ -194,7 +199,84 @@ if infos=="Distance parcourue":
              ax.set_xlabel('Distance_parcourue_Km')
              ax.set_ylabel('Date')
              st.pyplot(fig)
-             
+
+elif infos=="Vitesse de déplacement":
+    df_vitesse=vitesse_jour_km(df)
+    date_list=[]
+    for index,row in df_vitesse.iterrows():
+        date_list.append(index)
+    #Boucle pour recuperer la date selectionner
+    with st.expander("Choisissez une date"):
+        date_selecteds=st.selectbox("",date_list,index=None,placeholder="Choisisszez une date")
+    #Fin
+    #print(date_selected.strftime("%d %B %Y"))
+    st.write("Parametre de Vitesse")
+    if date_selecteds!=None:
+        #Un probleme avec le format de la date
+        date_a_affich=date_selecteds.strftime("%A %d %B %Y")
+        st.write(f"Vitesse effecctuer le {date_a_affich}")
+        dataframe_vitesse=df_vitesse.loc[[date_selecteds]]
+        st.table(dataframe_vitesse)
+        col1,col2,col3=st.columns(3)
+        max_vitesse=df_vitesse["vitesse"].max()
+        vitesse=round(dataframe_vitesse["vitesse"].values[0],6)
+        with col2:
+            with st.container(border=True):
+                distance=round(dataframe_vitesse["distance_km"].values[0],6)
+                distance_metre=distance*1000
+                temps=dataframe_vitesse["duree_heure"].values[0]
+                st.text(f"Distance en Km : {distance}")
+                st.text(f"distance en Mètre :{distance_metre}")
+                st.text(f"La durée :  {temps}")
+                st.text(f"Vitesse en km/h :{vitesse}")
+       
+        fig = go.Figure(go.Indicator(
+            mode = "gauge+number",
+            value = vitesse,
+            title = {'text': "Vitesse"},
+            gauge = {
+                'axis': {'range': [None, max_vitesse]},
+                'steps': [
+                {'range': [0,vitesse],'color':"lightgray"}],
+                    'threshold': {
+                    'line': {'color': "red", 'width': 1},
+                    'thickness': 0.75,
+                    'value':vitesse}}))
+        st.plotly_chart(fig,use_container_width=True)
+    else:
+        first_dataframe=df_vitesse.sort_values("index",ascending=False).head(1)
+        st.dataframe(first_dataframe)
+    col1,col2=st.columns([4,3])
+    #with st.container(border=True):
+    #    col1,col2=st.columns([2,4])
+    #    df_vitesse=vitesse_jour(df)
+    #    maximum=df_vitesse["distance_m"].max()
+    #    st.dataframe(df_vitesse)
+    #    #ICI ON EST
+    #    for index,rows in df_vitesse.iterrows():
+    #        with col1:
+    #          with st.container(border=True):
+    #                distance=round(df_vitesse.loc[index]["distance_m"],4)
+    #                st.text(distance)
+    #        with col2:
+    #            with st.container(border=True):
+    #                fig = go.Figure(go.Indicator(
+    #                mode = "gauge+number",
+    #                value = distance,
+    #                delta = {'reference':20},
+    #                title = {'text': "Vitesse"},
+    #                gauge = {
+    #                    'axis': {'range': [None, maximum]},
+    #                    'steps': [
+    #                    {'range': [0, distance],'color': "lightgray"}],
+    #                    'threshold': {
+    #                    'line': {'color': "red", 'width': 2},
+    #                    'thickness': 0.75,
+    #                    'value': distance}}))
+    #                st.plotly_chart(fig,use_container_width=True)
+
+
+
 #st-emotion-cache-1d4lk37
 #col1, col2,col3,col4,col5= st.columns(5)
 
