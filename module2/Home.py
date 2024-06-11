@@ -16,6 +16,61 @@ import plotly.graph_objects as go
 locale.setlocale(locale.LC_TIME,"fr_FR.UTF-8")
 sys.stdout.reconfigure(encoding='utf-8')
 st.set_page_config(page_title="EarthRangers",page_icon="🐘",layout="wide")
+if "chemin_fichier" in st.session_state:
+    chemin=st.session_state["chemin_fichier"]
+    df_for_name=traier_fichier(chemin)
+    numero_colier= df_for_name["source"].values[0]
+    src=df_for_name["SCR"].values[0]
+    col1,col2,col3=st.columns([4,5,6])
+    if numero_colier=="703630A":
+         with col3:
+            with st.container(border=True):
+                name=st.radio("",["Mâle Hamed"],horizontal=True)
+                st.text(f"Numéro de Collier : {numero_colier}")
+                st.text(f"Système de coordonnée Géographique : {src}")
+                st.text(f"Projection de Mercator")
+    elif numero_colier=="715235A":
+         with col3:
+            with st.container(border=True):
+                name=st.radio("",["Mâle de Séguéla"],horizontal=True)
+                st.text(f"Numéro de Collier : {numero_colier}")
+                st.text(f"Système de coordonnée Géographique : {src}")
+                st.text(f"Projection de Mercator")
+    elif numero_colier=="735999A":
+         with col3:
+            with st.container(border=True):
+                name=st.radio("",["Mâle de Lakota Guéyo"],horizontal=True)
+                st.text(f"Numéro de Collier : {numero_colier}")
+                st.text(f"Système de coordonnée Géographique : {src}")
+                st.text(f"Projection de Mercator")
+    elif numero_colier=="704895A":
+          with col3:
+            with st.container(border=True):
+                name=st.radio("",["Femelle d'Abokouamekro"],horizontal=True)
+                st.text(f"Numéro de Collier : {numero_colier}")
+                st.text(f"Système de coordonnée Géographique : {src}")
+                st.text(f"Projection de Mercator")
+    elif numero_colier=="703632A":
+         with col3:
+            with st.container(border=True):
+                name=st.radio("",["Femelle de Dassioko"],horizontal=True)
+                st.text(f"Numéro de Collier : {numero_colier}")
+                st.text(f"Système de coordonnée Géographique : {src}")
+                st.text(f"Projection de Mercator")
+    elif numero_colier=="738685A":
+        with col3:
+         with st.container(border=True):
+                name=st.radio("",["Mâle de Comoé"],horizontal=True)
+                st.text(f"Numéro de Collier : {numero_colier}")
+                st.text(f"Système de coordonnée Géographique : {src}")
+                st.text(f"Projection de Mercator")
+    elif numero_colier=="703631A":
+        with col3:
+         with st.container(border=True):
+                name=st.radio("",["Mâle de d'Abouokouamekro"],horizontal=True)
+                st.text(f"Numéro de Collier : {numero_colier}")
+                st.text(f"Système de coordonnée Géographique : {src}")
+                st.text(f"Projection de Mercator")
 with st.sidebar:
     st.header('Navigation')
     st.image("image/elephant.png")

@@ -30,21 +30,26 @@ def traier_fichier(fichier):
     #Renommage des differentes colonnes 
     additional_dict.rename(columns={"frequency":"frequence","mortality":"etat_elephant","horizontal_error":"erreur_precision","satellite_count":"nbre_satelite","low_voltage":"etat_batterie"},inplace=True)
 #Suppression de la colonne hdop qui represente la qualité de transmission du signal
-    additional_dict.drop(["hdop"],axis=1,inplace=True)
+    if hasattr(additional_dict,"hdop"):
+        additional_dict.drop(["hdop"],axis=1,inplace=True)
 #transformation du dataframe additional_dict en un dataFrame de Pandas
     additional_dict=pd.DataFrame(additional_dict)
 #copie du DataFrame additional_disk
     infos_sup=additional_dict
-    infos_sup["etat_elephant"]=infos_sup["etat_elephant"].apply(lambda x: x if not pd.isnull(x) else "")
+    if hasattr(additional_dict,"etat_elephant"):
+        infos_sup["etat_elephant"]=infos_sup["etat_elephant"].apply(lambda x: x if not pd.isnull(x) else "")
 #suppression des valeurs NaN dans la DataFrame additional_dict
 #1. colonne etat_elephant
-    additional_dict["etat_elephant"]=additional_dict["etat_elephant"].apply(lambda x:x if not pd.isnull(x) else "")
+        additional_dict["etat_elephant"]=additional_dict["etat_elephant"].apply(lambda x:x if not pd.isnull(x) else "")
 #2. colonne etat_batterie
-    additional_dict["etat_batterie"]=additional_dict["etat_batterie"].apply(lambda x:x if not pd.isnull(x) else "")
+    if hasattr(additional_dict,"etat_batterie"):
+        additional_dict["etat_batterie"]=additional_dict["etat_batterie"].apply(lambda x:x if not pd.isnull(x) else "")
 #3. colonne erreur_precision 
-    additional_dict["erreur_precision"]=additional_dict["erreur_precision"].apply(lambda x:x if not pd.isnull(x) else "")
+    if hasattr(additional_dict,"erreur_precision"):
+        additional_dict["erreur_precision"]=additional_dict["erreur_precision"].apply(lambda x:x if not pd.isnull(x) else "")
 #4. colonne nbre_satelite
-    additional_dict["nbre_satelite"]=additional_dict["nbre_satelite"].apply(lambda x:x if not pd.isnull(x) else "")
+    if hasattr(additional_dict,"nbre_satelite"):
+        additional_dict["nbre_satelite"]=additional_dict["nbre_satelite"].apply(lambda x:x if not pd.isnull(x) else "")
 #concatenation de la DataFrame d'origine avec la DataFrame issu de additionnal
     df=pd.concat([df,additional_dict],axis=1)
 #suppression du champ additionnal 
