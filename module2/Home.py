@@ -76,6 +76,8 @@ with st.sidebar:
     st.image("image/elephant.png")
     infos=st.selectbox("Pattern de Mouvement",["Vitesse de déplacement","Distance parcourue"],index=None,placeholder='choisir une action')
     st.title("")#
+    st.title("")
+    st.image("./image/minef.png")
     #st.selectbox("Dynamique de Mouvement",["Direction Geographique","Trajectoire Dominante"])
     #st.title("")
     #st.selectbox("Temps Passé à différents endroits",["Temps de marche","Temps de repos"])
@@ -257,6 +259,7 @@ if infos=="Distance parcourue":
 
 elif infos=="Vitesse de déplacement":
     df_vitesse=vitesse_jour_km(df)
+    max_vitesse=df_vitesse["vitesse"].max()
     date_list=[]
     for index,row in df_vitesse.iterrows():
         date_list.append(index)
@@ -273,12 +276,11 @@ elif infos=="Vitesse de déplacement":
         dataframe_vitesse=df_vitesse.loc[[date_selecteds]]
         st.table(dataframe_vitesse)
         col1,col2,col3=st.columns(3)
-        max_vitesse=df_vitesse["vitesse"].max()
         vitesse=round(dataframe_vitesse["vitesse"].values[0],6)
         with col2:
             with st.container(border=True):
                 distance=round(dataframe_vitesse["distance_km"].values[0],6)
-                distance_metre=distance*1000
+                distance_metre=round(distance*1000,5)
                 temps=dataframe_vitesse["duree_heure"].values[0]
                 st.text(f"Distance en Km : {distance}")
                 st.text(f"distance en Mètre :{distance_metre}")
@@ -300,8 +302,39 @@ elif infos=="Vitesse de déplacement":
         st.plotly_chart(fig,use_container_width=True)
     else:
         first_dataframe=df_vitesse.sort_values("index",ascending=False).head(1)
+        last_date=first_dataframe["index"].values[0]
+        last_vitesse=round(first_dataframe["vitesse"].values[0],5)
+        st.text(f"La vitesse parcourue la dernière fois c'est à dire {last_date.strftime("%A %d %B %Y")}")
         st.dataframe(first_dataframe)
-    col1,col2=st.columns([4,3])
+        col1,col2,col3=st.columns(3)
+        with col2:
+            with st.container(border=True):
+                distance=round(first_dataframe["distance_km"].values[0],5)
+                distance_metre=distance*1000
+                temps=first_dataframe["duree_heure"].values[0]
+                st.text(f"Distance en Km : {distance}")
+                st.text(f"distance en Mètre :{distance_metre}")
+                st.text(f"La durée :  {temps}")
+                st.text(f"Vitesse en km/h :{last_vitesse}")
+        fig = go.Figure(go.Indicator(
+            mode = "gauge+number",
+            value = last_vitesse,
+            title = {'text': "Vitesse"},
+            gauge = {
+                'axis': {'range': [None, max_vitesse]},
+                'steps': [
+                {'range': [0,last_vitesse],'color':"lightgray"}],
+                    'threshold': {
+                    'line': {'color': "red", 'width': 1},
+                    'thickness': 0.75,
+                    'value':last_vitesse}}))
+        st.plotly_chart(fig,use_container_width=True)
+    
+    #Reserver pour les vitesse de Jour et de nuit
+    
+
+
+
     #with st.container(border=True):
     #    col1,col2=st.columns([2,4])
     #    df_vitesse=vitesse_jour(df)
