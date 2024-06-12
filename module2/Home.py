@@ -19,6 +19,9 @@ st.set_page_config(page_title="EarthRangers",page_icon="🐘",layout="wide")
 if "chemin_fichier" in st.session_state:
     chemin=st.session_state["chemin_fichier"]
     df_for_name=traier_fichier(chemin)
+    df_for_last_date=df_for_name.sort_values("Date_Enregistrement").head(1)
+    last_date_transmit=df_for_last_date["Date_Enregistrement"].values[0]
+    last_hour_transmit=df_for_last_date["Heure_Enregistrement"].values[0]
     numero_colier= df_for_name["source"].values[0]
     src=df_for_name["SCR"].values[0]
     col1,col2,col3=st.columns([4,5,6])
@@ -27,6 +30,8 @@ if "chemin_fichier" in st.session_state:
             with st.container(border=True):
                 name=st.radio("",["Mâle Hamed"],horizontal=True)
                 st.text(f"Numéro de Collier : {numero_colier}")
+                st.text(f"Derniere Transmission : {last_date_transmit}")
+                st.text(f"Heure : {last_hour_transmit}")
                 st.text(f"Système de coordonnée Géographique : {src}")
                 st.text(f"Projection de Mercator")
     elif numero_colier=="715235A":
@@ -34,6 +39,8 @@ if "chemin_fichier" in st.session_state:
             with st.container(border=True):
                 name=st.radio("",["Mâle de Séguéla"],horizontal=True)
                 st.text(f"Numéro de Collier : {numero_colier}")
+                st.text(f"Derniere Transmission : {last_date_transmit}")
+                st.text(f"Heure : {last_hour_transmit}")
                 st.text(f"Système de coordonnée Géographique : {src}")
                 st.text(f"Projection de Mercator")
     elif numero_colier=="735999A":
@@ -41,6 +48,8 @@ if "chemin_fichier" in st.session_state:
             with st.container(border=True):
                 name=st.radio("",["Mâle de Lakota Guéyo"],horizontal=True)
                 st.text(f"Numéro de Collier : {numero_colier}")
+                st.text(f"Derniere Transmission : {last_date_transmit}")
+                st.text(f"Heure : {last_hour_transmit}")
                 st.text(f"Système de coordonnée Géographique : {src}")
                 st.text(f"Projection de Mercator")
     elif numero_colier=="704895A":
@@ -55,6 +64,8 @@ if "chemin_fichier" in st.session_state:
             with st.container(border=True):
                 name=st.radio("",["Femelle de Dassioko"],horizontal=True)
                 st.text(f"Numéro de Collier : {numero_colier}")
+                st.text(f"Derniere Transmission : {last_date_transmit}")
+                st.text(f"Heure : {last_hour_transmit}")
                 st.text(f"Système de coordonnée Géographique : {src}")
                 st.text(f"Projection de Mercator")
     elif numero_colier=="738685A":
@@ -62,6 +73,8 @@ if "chemin_fichier" in st.session_state:
          with st.container(border=True):
                 name=st.radio("",["Mâle de Comoé"],horizontal=True)
                 st.text(f"Numéro de Collier : {numero_colier}")
+                st.text(f"Derniere Transmission : {last_date_transmit}")
+                st.text(f"Heure : {last_hour_transmit}")
                 st.text(f"Système de coordonnée Géographique : {src}")
                 st.text(f"Projection de Mercator")
     elif numero_colier=="703631A":
@@ -69,6 +82,17 @@ if "chemin_fichier" in st.session_state:
          with st.container(border=True):
                 name=st.radio("",["Mâle de d'Abouokouamekro"],horizontal=True)
                 st.text(f"Numéro de Collier : {numero_colier}")
+                st.text(f"Derniere Transmission : {last_date_transmit}")
+                st.text(f"Heure : {last_hour_transmit}")
+                st.text(f"Système de coordonnée Géographique : {src}")
+                st.text(f"Projection de Mercator")
+    elif numero_colier=="8056":
+        with col3:
+         with st.container(border=True):
+                name=st.radio("",["NZI RIVER LOGDGE"],horizontal=True)
+                st.text(f"Numéro de Collier : {numero_colier}")
+                st.text(f"Derniere Transmission : {last_date_transmit}")
+                st.text(f"Heure : {last_hour_transmit}")
                 st.text(f"Système de coordonnée Géographique : {src}")
                 st.text(f"Projection de Mercator")
 with st.sidebar:
@@ -271,7 +295,7 @@ elif infos=="Vitesse de déplacement":
     st.write("Parametre de Vitesse")
     if date_selecteds!=None:
         #Un probleme avec le format de la date
-        date_a_affich=date_selecteds.strftime("%A %d %B %Y")
+        date_a_affich=date_selecteds.strftime("%d/%m/%Y")
         st.write(f"Vitesse effecctuer le {date_a_affich}")
         dataframe_vitesse=df_vitesse.loc[[date_selecteds]]
         st.table(dataframe_vitesse)
@@ -290,6 +314,7 @@ elif infos=="Vitesse de déplacement":
         fig = go.Figure(go.Indicator(
             mode = "gauge+number",
             value = vitesse,
+            number={"suffix":"km/h"},
             title = {'text': "Vitesse"},
             gauge = {
                 'axis': {'range': [None, max_vitesse]},
@@ -304,7 +329,7 @@ elif infos=="Vitesse de déplacement":
         first_dataframe=df_vitesse.sort_values("index",ascending=False).head(1)
         last_date=first_dataframe["index"].values[0]
         last_vitesse=round(first_dataframe["vitesse"].values[0],5)
-        st.text(f"La vitesse parcourue la dernière fois c'est à dire {last_date.strftime("%A %d %B %Y")}")
+        st.text(f"La vitesse parcourue la dernière fois c'est à dire {last_date.strftime("%d/%m/%Y")}")
         st.dataframe(first_dataframe)
         col1,col2,col3=st.columns(3)
         with col2:
@@ -318,7 +343,8 @@ elif infos=="Vitesse de déplacement":
                 st.text(f"Vitesse en km/h :{last_vitesse}")
         fig = go.Figure(go.Indicator(
             mode = "gauge+number",
-            value = last_vitesse,
+            value =last_vitesse,
+            number={"suffix":"km/h"},
             title = {'text': "Vitesse"},
             gauge = {
                 'axis': {'range': [None, max_vitesse]},
@@ -331,8 +357,11 @@ elif infos=="Vitesse de déplacement":
         st.plotly_chart(fig,use_container_width=True)
     
     #Reserver pour les vitesse de Jour et de nuit
-    
-
+    choix_vitesse_n_j=st.radio("",["","Vitesse Nuit et Jour"],horizontal=True)
+    if choix_vitesse_n_j=="Vitesse Nuit et Jour":
+        df_n_j=distance_par_nuit_jour_km(df)
+        df_n_j_unstack=df_n_j.unstack(level="temps")["Distance_parcourue_km"]
+        print(df_n_j_unstack.columns)
 
 
     #with st.container(border=True):

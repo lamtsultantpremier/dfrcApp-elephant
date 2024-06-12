@@ -23,6 +23,8 @@ def traier_fichier(fichier):
     df.drop(columns=["recorded_at",],axis=1,inplace=True)
 #Suppression de la chaine de caractere (telonics-collars) contenu dans la colonne source
     df["source"]=df["source"].str.replace("(telonics-collars)","").str.replace(" ","")
+    if df["source"].isin(['8056(elephantsci-awt)']).any():
+         df["source"]=df["source"].str.replace("8056(elephantsci-awt)","8056")
 #transformation de la colonne additionnal en dicttionnaire pour recuperer les elements à l'intérieur grace à eval
     df["additional"]=df["additional"].apply(eval)
 #creer un dataFrame dont les éléments sont les differents éléments de la colonne additional
