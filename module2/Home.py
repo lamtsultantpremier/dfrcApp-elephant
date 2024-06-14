@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from fonctionnalite.traitement import traier_fichier
 from streamlit_option_menu import option_menu
 from fonctionnalite.distance import distance_par_semaine_km,distance_par_mois_km,distance_jour_km,distance_par_annee_km,distance_par_nuit_jour_km,distance_par_jour_metre
-from fonctionnalite.activite_elephant import vitesse_jour_km
+from fonctionnalite.activite_elephant import vitesse_jour_km,vitesse_jour_nuit
 from io import StringIO
 import locale
 import sys
@@ -355,15 +355,33 @@ elif infos=="Vitesse de déplacement":
                     'thickness': 0.75,
                     'value':last_vitesse}}))
         st.plotly_chart(fig,use_container_width=True)
-    
+        choix_vitesse_nuit_jour=st.radio("",["","Vitesse Nuit et Jour"],horizontal=True)
+        if choix_vitesse_nuit_jour=="Vitesse Nuit et Jour":
+             col1,col2=st.columns([4,6])
+             df_vitesse_nuit_jour=vitesse_jour_nuit(df)
+             df_vitesse_nuit_jour_unstack=df_vitesse_nuit_jour.unstack(level="temps",fill_value=0)["vitesse"]
+             df_dist_nuit_jour_unstack=df_vitesse_nuit_jour.unstack(level="temps",fill_value=0)["distance"]
+             with col1:
+                st.text("Données Concernant les Vitesse")
+                st.table(df_vitesse_nuit_jour_unstack)
+                st.text("Données concernant les Distances")
+                st.table(  df_dist_nuit_jour_unstack)
+             with col2:
+                with st.container(border=True):
+                    vitesse_display=df_vitesse_nuit_jour_unstack
+                    fig,ax=plt.subplots(figsize=(6,11))
+                    vitesse_display.plot(kind="barh",ax=ax,color={"Jour":"blue","Nuit":"orange"},grid=False)
+                    ax.set_xlabel('vitesse en Km/h')
+                    ax.set_ylabel('Date')
+                    ax.spines['top'].set_visible(False)
+                    ax.spines['right'].set_visible(False)
+                    ax.spines["left"].set_visible(False)
+                    ax.spines['bottom'].set_visible(False)
+                    ax.set_title("vitesse de Nuit et de Jours",fontsize=11)
+                    st.pyplot(fig)
+                    
+                
     #Reserver pour les vitesse de Jour et de nuit
-    choix_vitesse_n_j=st.radio("",["","Vitesse Nuit et Jour"],horizontal=True)
-    if choix_vitesse_n_j=="Vitesse Nuit et Jour":
-        df_n_j=distance_par_nuit_jour_km(df)
-        df_n_j_unstack=df_n_j.unstack(level="temps")["Distance_parcourue_km"]
-        print(df_n_j_unstack.columns)
-
-
     #with st.container(border=True):
     #    col1,col2=st.columns([2,4])
     #    df_vitesse=vitesse_jour(df)
@@ -391,8 +409,6 @@ elif infos=="Vitesse de déplacement":
     #                    'thickness': 0.75,
     #                    'value': distance}}))
     #                st.plotly_chart(fig,use_container_width=True)
-
-
 
 #st-emotion-cache-1d4lk37
 #col1, col2,col3,col4,col5= st.columns(5)
