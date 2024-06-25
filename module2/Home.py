@@ -6,12 +6,12 @@ import matplotlib.pyplot as plt
 from fonctionnalite.traitement import traier_fichier
 from streamlit_option_menu import option_menu
 from fonctionnalite.distance import distance_par_semaine_km,distance_par_mois_km,distance_jour_km,distance_par_annee_km,distance_par_nuit_jour_km,distance_par_jour_metre
-from fonctionnalite.activite_elephant import vitesse_jour_km,vitesse_jour_nuit
+from fonctionnalite.activite_elephant import vitesse_jour_km,vitesse_jour_nuit,vitesse_jour_nuit_moyenne
 from io import StringIO
 import locale
 import sys
 import plotly.graph_objects as go
-
+import folium
 #definir la date au format francais
 locale.setlocale(locale.LC_TIME,"fr_FR.UTF-8")
 sys.stdout.reconfigure(encoding='utf-8')
@@ -379,8 +379,16 @@ elif infos=="Vitesse de déplacement":
                     ax.spines['bottom'].set_visible(False)
                     ax.set_title("vitesse de Nuit et de Jours",fontsize=11)
                     st.pyplot(fig)
-                    
-                
+             st.subheader("Vitesse Moyenne de Jour et de nuit")
+             df_vitesse_moy=vitesse_jour_nuit_moyenne(df)
+             st.table(df_vitesse_moy)
+             fig,ax=plt.subplots(figsize=(6,11))
+             df_vitesse_moy.plot(kind="barh",ax=ax,color={"vitesse_moyenne_jour":"gray","vitesse_moyenne_nuit":"green"},grid=False) 
+             ax.set_xlabel=("Vitesse Moyenne")  
+             ax.set_ylabel("Date")
+             ax.set_title("Vitesse Moyenne de Jour et de Nuit")
+             ax.spines[["top","left","right","bottom"]].set_visible(False)
+             st.pyplot(fig)   
     #Reserver pour les vitesse de Jour et de nuit
     #with st.container(border=True):
     #    col1,col2=st.columns([2,4])
@@ -409,6 +417,7 @@ elif infos=="Vitesse de déplacement":
     #                    'thickness': 0.75,
     #                    'value': distance}}))
     #                st.plotly_chart(fig,use_container_width=True)
+
 
 #st-emotion-cache-1d4lk37
 #col1, col2,col3,col4,col5= st.columns(5)

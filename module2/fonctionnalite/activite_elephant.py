@@ -219,3 +219,11 @@ def vitesse_jour_nuit(df):
     example=trajet_elephant_km(df)
     example_group=example.groupby(["date_arr","temps"]).agg({"vitesse":"sum","distance":"sum"})
     return  example_group
+
+def vitesse_jour_nuit_moyenne(df):
+    example=trajet_elephant_km(df)
+    example_group=example.groupby(["date_arr","temps"]).agg({"vitesse":"mean"})
+    #example_group.rename({"vitesse":"vitesse_moyenne"},inplace=True)
+    group_unstack=example_group.unstack(fill_value=0)["vitesse"]
+    group_unstack.rename(columns={"Jour":"vitesse_moyenne_jour","Nuit":"vitesse_moyenne_nuit"},inplace=True)
+    return  group_unstack
