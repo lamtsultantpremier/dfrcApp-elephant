@@ -105,4 +105,4 @@ if "nom_fichier" in st.session_state and "type_fichier" in st.session_state and 
         st.text("Extrait du contenu du fichier")
         if "df" in st.session_state: 
             df=st.session_state["df"]
-            st.dataframe(df.head(3))
+            st.dataframe(df.head(1))

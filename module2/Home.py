@@ -19,13 +19,15 @@ st.set_page_config(page_title="EarthRangers",page_icon="🐘",layout="wide")
 if "chemin_fichier" in st.session_state:
     chemin=st.session_state["chemin_fichier"]
     df_for_name=traier_fichier(chemin)
-    df_for_last_date=df_for_name.sort_values("Date_Enregistrement").head(1)
+    df_for_last_date=df_for_name.sort_values("Date_Enregistrement",ascending=False).head(1)
     last_date_transmit=df_for_last_date["Date_Enregistrement"].values[0]
     last_hour_transmit=df_for_last_date["Heure_Enregistrement"].values[0]
     numero_colier= df_for_name["source"].values[0]
+    nom_elephant=""
     src=df_for_name["SCR"].values[0]
     col1,col2,col3=st.columns([4,5,6])
     if numero_colier=="703630A":
+         nom_elephant="Mâle Hamed"
          with col3:
             with st.container(border=True):
                 name=st.radio("",["Mâle Hamed"],horizontal=True)
@@ -35,6 +37,7 @@ if "chemin_fichier" in st.session_state:
                 st.text(f"Système de coordonnée Géographique : {src}")
                 st.text(f"Projection de Mercator")
     elif numero_colier=="715235A":
+         nom_elephant="Mâle de Séguéla"
          with col3:
             with st.container(border=True):
                 name=st.radio("",["Mâle de Séguéla"],horizontal=True)
@@ -44,6 +47,7 @@ if "chemin_fichier" in st.session_state:
                 st.text(f"Système de coordonnée Géographique : {src}")
                 st.text(f"Projection de Mercator")
     elif numero_colier=="735999A":
+         nom_elephant="Mâle de Lakota Guéyo"
          with col3:
             with st.container(border=True):
                 name=st.radio("",["Mâle de Lakota Guéyo"],horizontal=True)
@@ -53,6 +57,7 @@ if "chemin_fichier" in st.session_state:
                 st.text(f"Système de coordonnée Géographique : {src}")
                 st.text(f"Projection de Mercator")
     elif numero_colier=="704895A":
+          nom_elephant="Femelle d'Abokouamekro"
           with col3:
             with st.container(border=True):
                 name=st.radio("",["Femelle d'Abokouamekro"],horizontal=True)
@@ -60,6 +65,7 @@ if "chemin_fichier" in st.session_state:
                 st.text(f"Système de coordonnée Géographique : {src}")
                 st.text(f"Projection de Mercator")
     elif numero_colier=="703632A":
+         nom_elephant="Femelle de Dassioko"
          with col3:
             with st.container(border=True):
                 name=st.radio("",["Femelle de Dassioko"],horizontal=True)
@@ -69,6 +75,7 @@ if "chemin_fichier" in st.session_state:
                 st.text(f"Système de coordonnée Géographique : {src}")
                 st.text(f"Projection de Mercator")
     elif numero_colier=="738685A":
+        nom_elephant="Mâle de Comoé"
         with col3:
          with st.container(border=True):
                 name=st.radio("",["Mâle de Comoé"],horizontal=True)
@@ -78,6 +85,7 @@ if "chemin_fichier" in st.session_state:
                 st.text(f"Système de coordonnée Géographique : {src}")
                 st.text(f"Projection de Mercator")
     elif numero_colier=="703631A":
+        nom_elephant="Mâle de d'Abouokouamekro"
         with col3:
          with st.container(border=True):
                 name=st.radio("",["Mâle de d'Abouokouamekro"],horizontal=True)
@@ -87,6 +95,7 @@ if "chemin_fichier" in st.session_state:
                 st.text(f"Système de coordonnée Géographique : {src}")
                 st.text(f"Projection de Mercator")
     elif numero_colier=="8056":
+        nom_elephant="NZI RIVER LOGDGE"
         with col3:
          with st.container(border=True):
                 name=st.radio("",["NZI RIVER LOGDGE"],horizontal=True)
@@ -95,6 +104,7 @@ if "chemin_fichier" in st.session_state:
                 st.text(f"Heure : {last_hour_transmit}")
                 st.text(f"Système de coordonnée Géographique : {src}")
                 st.text(f"Projection de Mercator")
+    st.session_state["nom_elephant"]=nom_elephant
 with st.sidebar:
     st.header('Navigation')
     st.image("image/elephant.png")
@@ -417,7 +427,6 @@ elif infos=="Vitesse de déplacement":
     #                    'thickness': 0.75,
     #                    'value': distance}}))
     #                st.plotly_chart(fig,use_container_width=True)
-
 
 #st-emotion-cache-1d4lk37
 #col1, col2,col3,col4,col5= st.columns(5)
