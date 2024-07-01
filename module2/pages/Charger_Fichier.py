@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from io import StringIO
 import os
+import matplotlib.pyplot as plt
 from pathlib import Path
 from fonctionnalite.traitement import traier_fichier
 if "chemin_fichier" in st.session_state:
