@@ -27,7 +27,7 @@ else:
         iframe=f.IFrame(html,width=200,height=200)
         popup=f.Popup(iframe,max_width=300)
         map=f.Map(location=(first_lat,first_long),zoom_start=10)
-        icon=f.CustomIcon("image/elephant_marker.png",icon_size=(20,20))
+        icon=f.CustomIcon("image/elephant_marker.png",icon_size=(12,12))
         f.Marker([first_lat,first_long],popup=popup,icon=icon).add_to(map)
         st_folium(map,width=1000)
     if carte=="Zone les plus fréquentés":
@@ -50,7 +50,11 @@ else:
             datimes.append(str(date_time))
         dataframes_from_trajet=pd.DataFrame({"Latitude":latitudes,"Longitude":longitudes,"date":datimes})
         #afficher les longitude et latitudes
-        fig=px.scatter(dataframes_from_trajet,x="Longitude",y="Latitude",hover_data={"date":True,"Longitude":False,"Latitude":False})
+        fig=px.scatter(dataframes_from_trajet,x="Longitude",y="Latitude",hover_data={"date":True,"Longitude":True,"Latitude":True})
         fig.update_layout({"width":900,"height":500})
         st.plotly_chart(fig)
-      
+    elif carte=="Carte de chaleur":
+        options=["liste des Points","Carte des chaleurs"]
+        carte_selected=st.radio("",options,index=0,horizontal=True)
+        st.write(carte_selected)
+
