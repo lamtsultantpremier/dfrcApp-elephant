@@ -6,6 +6,7 @@ import datetime
 import requests
 import plotly.express as px
 import pandas as pd
+from fonctionnalite.zone_frequentation import distance_dbscan,make_cluster
 if "df" not in st.session_state:
     st.write("Veuillez Charger un fichier avant de continuer")
 else:
@@ -31,16 +32,16 @@ else:
         f.Marker([first_lat,first_long],popup=popup,icon=icon).add_to(map)
         st_folium(map,width=1000)
     if carte=="Zone les plus fréquentés":
+        col4,col5=st.columns(2)
         latitudes=[]
         longitudes=[]
         dates_times=[]
         datimes=[]
-        col1,col2,col3=st.columns([14,20,14])
+        col1,col2=st.columns(2)
          #reserver à l'affichage sur matplolib
-        with col2:
-            if "nom_elephant" in st.session_state:
-                nom_elephant=st.session_state["nom_elephant"]
-                st.write(f"Representation de la Trajectoire {nom_elephant}")
+        if "nom_elephant" in st.session_state:
+            nom_elephant=st.session_state["nom_elephant"]
+            st.write(f"Representation de la Trajectoire {nom_elephant}")
         df_for_trajet=df[["Date_Enregistrement","Heure_Enregistrement","Latitude","Longitude"]]
         for index,rows in df_for_trajet.iterrows():
             latitudes.append(float(rows["Latitude"]))
@@ -49,12 +50,29 @@ else:
         for date_time in dates_times:
             datimes.append(str(date_time))
         dataframes_from_trajet=pd.DataFrame({"Latitude":latitudes,"Longitude":longitudes,"date":datimes})
+        #Afficher les differentes date de debut et de Fin
+        date_debut=dataframes_from_trajet.head(1)["date"].values[0]
+        date_fin=dataframes_from_trajet.tail(1)["date"].values[0]
         #afficher les longitude et latitudes
-        fig=px.scatter(dataframes_from_trajet,x="Longitude",y="Latitude",hover_data={"date":True,"Longitude":True,"Latitude":True})
-        fig.update_layout({"width":900,"height":500})
+        date_debut=date_debut.split(" ")[0]
+        st.write(date_debut)
+        fig=px.scatter(dataframes_from_trajet,x="Longitude",y="Latitude",hover_data={"date":True,"Longitude":True,"Latitude":True},title=f"Position Successif de {nom_elephant}")
+        fig.update_layout({"width":900,"height":300})
         st.plotly_chart(fig)
+        st.write("")
+        st.write("Bonjour")
+        #determine the different cluster
+        epsilon=distance_dbscan(df)
+        if epsilon!=0.0:
+            df_cluster=make_cluster(df,epsilon)
+            fig=px.scatter(df_cluster,x="Longitude",y="Latitude",title=f"Zone de Forte Fréquentation de {nom_elephant}",color="cluster",labels={"cluster":"niveau de Frequentation"})
+            st.plotly_chart(fig)
+        else:
+            st.write(epsilon)
+            df_cluster=make_cluster(df,0.003)
+            fig=px.scatter(df_cluster,x="Longitude",y="Latitude",title=f"Zone de Forte Fréquentation de {nom_elephant}",color="cluster")
+            st.plotly_chart(fig)
     elif carte=="Carte de chaleur":
         options=["liste des Points","Carte des chaleurs"]
         carte_selected=st.radio("",options,index=0,horizontal=True)
         st.write(carte_selected)
-
