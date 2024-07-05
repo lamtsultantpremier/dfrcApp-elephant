@@ -1,7 +1,7 @@
 from geopy.distance import geodesic
 import pandas as pd
 from sklearn.cluster import DBSCAN
-
+import requests
 #fonction to determine the min distance for epsilon of DBSCAN
 def distance_dbscan(df):
     data=df.reset_index(drop=True)
@@ -29,3 +29,38 @@ def make_cluster(df,eps):
     clusters_label=dbscan.labels_
     dt["cluster"]=clusters_label
     return dt
+#find centoid location
+def find_location(df_cluster):
+    df_mean=df_cluster.groupby("cluster").agg({"Latitude":"mean","Longitude":"mean"})
+    lieux=[{"region":[],"district":[],"village":[],"Latitude":[],"Longitude":[]}]
+    for index,row in df_mean.iterrows():
+        lon=row['Longitude']
+        lat=row['Latitude']
+        url=f"https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat={lat}&lon={lon}"
+        headers={
+                    'USER-AGENT':"laminekone7818@gmail.com"
+                }
+        reponse=requests.get(url,headers=headers)
+        if reponse.status_code==200:
+            village=""
+            district=""
+            address=(reponse.json()["address"])
+            if "village" in address:
+                village=address["village"]
+            if "state_district" in address:
+                district=address["state_district"]
+            region=address["state"]
+            pays=address["country"]
+            lieux[0]["region"].append(region)
+            lieux[0]["district"].append(district)
+            lieux[0]["village"].append(village)
+            lieux[0]["Latitude"].append(lat)
+            lieux[0]["Longitude"].append(lon)
+    regions=lieux[0]["region"]
+    districts=lieux[0]["district"]
+    villages=lieux[0]["village"]
+    latitudes=lieux[0]["Latitude"]
+    longitudes=lieux[0]["Longitude"]
+    df_lieux=pd.DataFrame({"region":regions,"district":districts,"village":villages,"Latitude":latitudes,"Longitude":longitudes})
+    return df_lieux
+        
