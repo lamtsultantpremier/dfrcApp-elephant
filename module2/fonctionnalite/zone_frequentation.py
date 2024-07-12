@@ -2,6 +2,7 @@ from geopy.distance import geodesic
 import pandas as pd
 from sklearn.cluster import DBSCAN
 import requests
+import random
 #fonction to determine the min distance for epsilon of DBSCAN
 def distance_dbscan(df):
     data=df.reset_index(drop=True)
@@ -63,4 +64,25 @@ def find_location(df_cluster):
     longitudes=lieux[0]["Longitude"]
     df_lieux=pd.DataFrame({"region":regions,"district":districts,"village":villages,"Latitude":latitudes,"Longitude":longitudes})
     return df_lieux
-        
+def color(dt):
+    colors =[
+    "red",
+    "green",
+    "yellow",
+    "orange"]
+    color=[]
+    df_group=dt.groupby("cluster").agg({"Longitude":"mean"})
+    df_group["color"]=""
+    for index in df_group.index:
+        choice=random.choice(colors)
+        if choice not in  df_group["color"]:
+            df_group.loc[index,"color"]=choice
+        else:
+            choice=random.choice(colors)
+    for index,row in df_group.iterrows():
+        color.append({index:row["color"]})
+    return color
+def number_in_index(number, list_of_dicts):
+    for d in list_of_dicts:
+        if number in d:
+            return(d[number])

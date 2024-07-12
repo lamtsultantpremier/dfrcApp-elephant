@@ -6,7 +6,9 @@ import datetime
 import requests
 import plotly.express as px
 import pandas as pd
-from fonctionnalite.zone_frequentation import distance_dbscan,make_cluster,find_location
+from fonctionnalite.zone_frequentation import distance_dbscan,make_cluster,find_location,number_in_index,color
+from selenium import webdriver
+import os
 if "df" not in st.session_state:
     st.write("Veuillez Charger un fichier avant de continuer")
 else:
@@ -81,14 +83,47 @@ else:
                 fig=px.scatter(df_cluster,x="Longitude",y="Latitude",title=f"Zone de Forte Fréquentation {nom_elephant} du {date_debut} au {date_fin}",color="cluster")
                 st.plotly_chart(fig)
         elif zone_frequenter=="Visulaisation des Zones de Forte Frequentations":
-            st.write("Bonjour")
             epsilon=distance_dbscan(df)
             if epsilon!=0.0:
                 df_cluster=make_cluster(df,epsilon)
-                st.dataframe(df_cluster)
+                c=color(df_cluster)
+                m=f.Map(location=[df_cluster["Latitude"].mean(),df_cluster["Longitude"].mean()],zoom_start=9)
+                for index,row in df_cluster.iterrows():
+                    f.CircleMarker(location=[row["Latitude"],row["Longitude"]],
+                    raduis=0.3,
+                    fill=True,
+                    fill_opacity=1,
+                    ).add_to(m)
+                st_folium(m,width=1000)        
             else:
                df_cluster=make_cluster(df,0.02)
-               st.dataframe(df_cluster)
+               m=f.Map(location=[df_cluster["Latitude"].mean(),df_cluster["Longitude"].mean()],zoom_start=9)
+               for index,row in df_cluster.iterrows():
+                    f.CircleMarker(location=[row["Latitude"],row["Longitude"]],
+                    raduis=0.3,
+                    fill=True,
+                    fill_opacity=1,
+                    ).add_to(m)
+               st_folium(m,width=1000)
+               file_name="zone_forte_concentration.html"
+               m.save(file_name)
+               options=webdriver.ChromeOptions()
+               options.add_argument("--headless")
+               options.add_argument("--no-sandbox")
+               options.add_argument("--disable-dev-shm-usage")
+               driver=webdriver.Chrome(options=options)
+               file_path=os.path.abspath(file_name)
+               driver.get('file://'+file_path)
+               driver.implicitly_wait(10)
+               driver.save_screenshot("zone_frequentation.png")
+               image_path="zone_frequentation.png"
+               if st.button("Generer l'image"):
+                   with open(image_path,"rb") as file:
+                       st.download_button(
+                           label="Telecharger la Carte",
+                           data=file,
+                           file_name="zone_frequentation.png",
+                           mime="image/png")
     elif carte=="Carte de chaleur":
         options=["liste des Points","Carte des chaleurs"]
         carte_selected=st.radio("",options,index=0,horizontal=True)
