@@ -3,6 +3,10 @@ import pandas as pd
 from sklearn.cluster import DBSCAN
 import requests
 import random
+from selenium import webdriver
+import time
+import os
+import streamlit as st
 #fonction to determine the min distance for epsilon of DBSCAN
 def distance_dbscan(df):
     data=df.reset_index(drop=True)
@@ -86,3 +90,41 @@ def number_in_index(number, list_of_dicts):
     for d in list_of_dicts:
         if number in d:
             return(d[number])
+def generate_and_download_image():
+    file_name="zone_forte_concentration.html"
+    options=webdriver.ChromeOptions()
+    options.add_argument("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    driver=webdriver.Chrome(options=options)
+    file_path=os.path.abspath(file_name)
+    driver.get('file://'+file_path)
+    driver.implicitly_wait(15)
+    driver.save_screenshot("zone_frequentation.png")
+    driver.quit()
+    image_path="zone_frequentation.png"
+    with open(image_path,"rb") as file:
+            btn=st.download_button(
+                label="Telecharger la Carte",
+                data=file,
+                file_name="zone_frequentation.png",
+                mime="image/png")
+def generate_and_download_image_heatmap(nom_fichier,nom_elephant):
+    file_name=nom_fichier
+    options=webdriver.ChromeOptions()
+    options.add_argument("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    driver=webdriver.Chrome(options=options)
+    file_path=os.path.abspath(file_name)
+    driver.get('file://'+file_path)
+    time.sleep(20)
+    driver.save_screenshot("carte_de_chaleur.png")
+    driver.quit()
+    image_path="carte_de_chaleur.png"
+    with open(image_path,"rb") as file:
+            btn=st.download_button(
+                label="Telecharger la Carte",
+                data=file,
+                file_name=f"{nom_elephant}_heatMap.png",
+                mime="image/png")

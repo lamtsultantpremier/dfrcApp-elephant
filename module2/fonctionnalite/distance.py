@@ -2,6 +2,24 @@ import pandas as pd
 from geopy.distance import geodesic
 """Permet de definir les differentes distances parcourues par l'éléphant
 """
+def dist_jour_nuit(dt):
+    data=dt.groupby(["Date_Enregistrement","temps"]).apply(distance_par_jour_km)
+    return data
+def distance(dataframe):
+    #conversion du dataframe en numeric
+    dist_total=0
+    for i in range(1,len(dataframe)):
+        prev_long=dataframe["Longitude"].iloc[i-1]
+        prev_lati=dataframe["Latitude"].iloc[i-1]
+        prev_pos=(prev_lati,prev_long)
+        cur_long=dataframe["Longitude"].iloc[i]
+        cur_lati=dataframe["Latitude"].iloc[i]
+        cur_pos=(cur_lati,cur_long)
+        distance=geodesic(prev_pos,cur_pos).km
+        #distance total de chaque groupe
+        dist_total+=distance
+    return dist_total
+#
 def distance_par_jour_km(dataframe):
     #conversion du dataframe en numeric
     dist_total=0
