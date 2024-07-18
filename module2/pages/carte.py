@@ -7,10 +7,11 @@ import requests
 import plotly.express as px
 import pandas as pd
 from fonctionnalite.zone_frequentation import distance_dbscan,make_cluster,find_location,number_in_index,color,generate_and_download_image,generate_and_download_image_heatmap
-from fonctionnalite.distance import distance,dist_jour_nuit
+from fonctionnalite.distance import distance,dist_jour_nuit,distance_jour_km,dist_group_temps
 from selenium import webdriver
 import os
 from folium.plugins import HeatMap
+from folium.plugins import AntPath
 import branca
 import branca.colormap as cm
 from collections import defaultdict
@@ -239,10 +240,66 @@ else:
                 st.dataframe(data_n_j)
             st.text("")
             st.text("")
-            map=f.Map(location=[df["Latitude"].astype(float).mean(),df["Longitude"].astype(float).mean()],zoom_start=9)
-            st_folium(map,width=1000)
+            options_map=["Afficher toutes les déplacements","Afficher les déplacements de Nuit et Jour"]
+            map_selected=st.radio("",options_map,horizontal=True)
+            if map_selected=="Afficher toutes les déplacements":
+                map=f.Map(location=[df["Latitude"].astype(float).mean(),df["Longitude"].astype(float).mean()],zoom_start=10)
+                latitude=df["Latitude"].astype(float)
+                longitude=df["Longitude"].astype(float)
+                first_lat=df["Latitude"].head(1).values[0]
+                first_long=df["Longitude"].head(1).values[0]
+                last_lat=df["Latitude"].tail(1).values[0]
+                last_long=df["Longitude"].tail(1).values[0]
+                data=list(zip(latitude,longitude))
+                icon=f.CustomIcon("image/elephant_marker.png",icon_size=(11,11))
+                f.Marker([first_lat,first_long],icon=icon).add_to(map)
+                icon2=f.CustomIcon("image/elephant_marker.png",icon_size=(11,11))
+                f.Marker([last_lat,last_long],icon=icon2).add_to(map)
+                AntPath(data,delay=400,weight=3,color="red",pulse_color="blue",dash_array=[50,60],reverse=True).add_to(map)
+                st_folium(map,width=1000)
+            else:
+                map=f.Map(location=[df["Latitude"].astype(float).mean(),df["Longitude"].astype(float).mean()],zoom_start=10)
+                latitude=df["Latitude"].astype(float)
+                longitude=df["Longitude"].astype(float)
+                first_lat=df["Latitude"].head(1).values[0]
+                first_long=df["Longitude"].head(1).values[0]
+                last_lat=df["Latitude"].tail(1).values[0]
+                last_long=df["Longitude"].tail(1).values[0]
+                icon1=f.CustomIcon("image/elephant_marker.png",icon_size=(11,11))
+                icon2=f.CustomIcon("image/elephant_marker.png",icon_size=(11,11))
+                data_nuit_jour =dist_group_temps(df)
+                dict_group_nuit_jour={name:group for name,group in data_nuit_jour}
+                option_nuit_jour=["Nuit","Jour","Nuit et Jour"]
+                option_nuit_jour_select=st.radio("",option_nuit_jour,horizontal=True)
+                if option_nuit_jour_select=="Jour":
+                    dict_jour=dict_group_nuit_jour.get(("Jour",))
+                    f.Marker([dict_jour.head(1)["Latitude"].values[0],dict_jour.head(1)["Longitude"].values[0]],icon=icon1).add_to(map)
+                    f.Marker([dict_jour.tail(1)["Latitude"].values[0],dict_jour.tail(1)["Longitude"].values[0]],icon=icon2).add_to(map)
+                    data_jour=list(zip(dict_jour["Latitude"].astype(float),dict_jour["Longitude"].astype(float)))
+                    AntPath(data_jour,delay=1000,weight=3,color="white",dash_array=[10,20],pulse_color="green",reverse=True).add_to(map)
+                    st_folium(map,width=1000)
+                elif option_nuit_jour_select=="Nuit":
+                    dict_nuit=dict_group_nuit_jour.get(("Nuit",))
+                    f.Marker([dict_nuit.head(1)["Latitude"].values[0],dict_nuit.head(1)["Longitude"].values[0]],icon=icon1).add_to(map)
+                    f.Marker([dict_nuit.tail(1)["Latitude"].values[0],dict_nuit.tail(1)["Longitude"].values[0]],icon=icon2).add_to(map)
+                    data_nuit=list(zip(dict_nuit["Latitude"].astype(float),dict_nuit["Longitude"].astype(float)))
+                    AntPath(data_nuit,delay=1000,weight=3,color="white",dash_array=[10,20],pulse_color="blue",reverse=True).add_to(map)
+                    st_folium(map,width=1000)
+                else:
+                    dict_jour=dict_group_nuit_jour.get(("Jour",))
+                    data_jour=list(zip(dict_jour["Latitude"].astype(float),dict_jour["Longitude"].astype(float)))
+                    dict_nuit=dict_group_nuit_jour.get(("Nuit",))
+                    data_nuit=list(zip(dict_nuit["Latitude"].astype(float),dict_nuit["Longitude"].astype(float)))
+                    icon=f.CustomIcon("image/elephant_marker.png",icon_size=(11,11))
+                    f.Marker([first_lat,first_long],icon=icon).add_to(map)
+                    icon1=f.CustomIcon("image/elephant_marker.png",icon_size=(11,11))
+                    f.Marker([last_lat,last_long],icon=icon1).add_to(map)
+                    AntPath(data_jour,delay=1100,weight=3,color="white",dash_array=[20,30],pulse_color="green",reverse=True).add_to(map)
+                    AntPath(data_nuit,delay=1100,weight=3,color="white",dash_array=[20,30],pulse_color="blue",reverse=True).add_to(map)
+                    st_folium(map,width=1000)
+
             
-           
+
 
 
         

@@ -2,6 +2,9 @@ import pandas as pd
 from geopy.distance import geodesic
 """Permet de definir les differentes distances parcourues par l'éléphant
 """
+def dist_group_temps(dt):
+    data=dt.groupby(["temps"])
+    return data
 def dist_jour_nuit(dt):
     data=dt.groupby(["Date_Enregistrement","temps"]).apply(distance_par_jour_km)
     return data
@@ -19,7 +22,7 @@ def distance(dataframe):
         #distance total de chaque groupe
         dist_total+=distance
     return dist_total
-#
+
 def distance_par_jour_km(dataframe):
     #conversion du dataframe en numeric
     dist_total=0
@@ -51,7 +54,6 @@ def distance_par_jour_m(dataframe):
         dist_total+=distance
     return dist_total
 
-
 def distance_par_jour_metre(dataframe):
     #conversion du dataframe en numeric
     dataframe["Longitude"]=pd.to_numeric(dataframe["Longitude"],errors='coerce')
@@ -71,7 +73,6 @@ def distance_par_jour_metre(dataframe):
     return dist_total
 #Fin de la fonction
 
-
 #permet de définir la distance par jour en metre en fonction des coordonnées
 def distance_par_jour_m(dataframe):
     #conversion du dataframe en numeric
@@ -87,7 +88,6 @@ def distance_par_jour_m(dataframe):
         #distance total de chaque groupe
         dist_total+=distance
     return dist_total
-
 
 #distance Jour en Km
 def distance_jour_km(dt):
