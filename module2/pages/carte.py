@@ -224,19 +224,20 @@ else:
             st.text(f"Date Fin: {df.tail(1)["Date_Enregistrement"].values[0]}")
             st.dataframe(data_display)
             col1,col2=st.columns(2)
-               
+            data_for_distance=dist_group_temps(df)
+            dict_group_for_distance={name:group for name,group in data_for_distance}
+            dataframe_nuit=dict_group_for_distance.get(("Nuit",))
+            dataframe_jour=dict_group_for_distance.get(("Jour",))
+            distance_nuit=distance(dataframe_nuit)
+            distance_jour=distance(dataframe_jour)
+            distance_total=distance_nuit+distance_jour
             with col1:
                 st.write("Distance Totale en Km")
-                distance=distance(df)
-                df_distance=pd.DataFrame({"Distance_total":[f"{distance} Km"]})
+                df_distance=pd.DataFrame({"Distance_total":[f"{distance_total} Km"]})
                 st.dataframe(df_distance)
             with col2:
                 st.write("Distance de Nuit et Jour en Km")
-                data=dist_jour_nuit(df)
-                data1=data.unstack(level="temps",fill_value=0)
-                dist_nuit=data1["Nuit"].sum()
-                dist_jour=data1["Jour"].sum()
-                data_n_j=pd.DataFrame({"Distance Nuit":[f"{dist_nuit} Km"],"Distance Jour":[f"{dist_jour} Km"]})
+                data_n_j=pd.DataFrame({"Distance Nuit":[f"{distance_nuit} Km"],"Distance Jour":[f"{distance_jour} Km"]})
                 st.dataframe(data_n_j)
             st.text("")
             st.text("")
