@@ -15,10 +15,13 @@ from folium.plugins import AntPath
 import branca
 import branca.colormap as cm
 from collections import defaultdict
+from streamlit.components.v1 import html
+from geopy.distance import geodesic
 if "df" not in st.session_state:
     st.write("Veuillez Charger un fichier avant de continuer")
 else:
     df=st.session_state["df"]
+    df=df.sort_values(by="Date_Enregistrement",ascending=False)
     with st.sidebar:
         carte=st.selectbox("Carte",["","Zone les plus fréquentés","Carte de chaleur"],index=0,placeholder="Choisir une action")
     if carte=="":
@@ -83,7 +86,14 @@ else:
             else:
                 df_cluster=make_cluster(df,0.03)
                 #zones proches des endroits de concentrations
+                distance=[]
                 df_lieux_proche=find_location(df_cluster)
+                df_lieux_proche["Distance_Actuel_Elephant"]=""
+                latitude_actuel=float(df.head(1)["Latitude"].values[0])
+                longitude_actuel=float(df.head(1)["Longitude"].values[0])
+                for index,row in df_lieux_proche.iterrows():
+                   distance_calculer=(geodesic((latitude_actuel,longitude_actuel),(float(row["Latitude"]),float(row["Longitude"]))).km)
+                   df_lieux_proche.loc[index,"Distance_Actuel_Elephant"]=f"{distance_calculer} Km"
                 st.write("Lieux Proches des Zones de fortes concentration")
                 st.dataframe(df_lieux_proche)
                 fig=px.scatter(df_cluster,x="Longitude",y="Latitude",title=f"Zone de Forte Fréquentation {nom_elephant} du {date_debut} au {date_fin}",color="cluster")
@@ -220,8 +230,8 @@ else:
             st.subheader("Données cartographiques")
             st.text(f"Nom Elephant:{st.session_state["nom_elephant"]}")
             st.text(f"Nombre de données {len(df)}")
-            st.text(f"Date debut: {df.head(1)["Date_Enregistrement"].values[0]}")
-            st.text(f"Date Fin: {df.tail(1)["Date_Enregistrement"].values[0]}")
+            st.text(f"Date debut: {df.tail(1)["Date_Enregistrement"].values[0]}")
+            st.text(f"Date Fin: {df.head(1)["Date_Enregistrement"].values[0]}")
             st.dataframe(data_display)
             col1,col2=st.columns(2)
             data_for_distance=dist_group_temps(df)
@@ -241,10 +251,10 @@ else:
                 st.dataframe(data_n_j)
             st.text("")
             st.text("")
-            options_map=["Afficher toutes les déplacements","Afficher les déplacements de Nuit et Jour"]
+            options_map=["Afficher tous les déplacements","Afficher les déplacements de Nuit et Jour"]
             map_selected=st.radio("",options_map,horizontal=True)
-            if map_selected=="Afficher toutes les déplacements":
-                map=f.Map(location=[df["Latitude"].astype(float).mean(),df["Longitude"].astype(float).mean()],zoom_start=10)
+            if map_selected=="Afficher tous les déplacements":
+                map=f.Map(location=[df["Latitude"].astype(float).mean(),df["Longitude"].astype(float).mean()],zoom_start=9)
                 latitude=df["Latitude"].astype(float)
                 longitude=df["Longitude"].astype(float)
                 first_lat=df["Latitude"].head(1).values[0]
@@ -257,7 +267,26 @@ else:
                 icon2=f.CustomIcon("image/elephant_marker.png",icon_size=(11,11))
                 f.Marker([last_lat,last_long],icon=icon2).add_to(map)
                 AntPath(data,delay=400,weight=3,color="red",pulse_color="blue",dash_array=[50,60],reverse=True).add_to(map)
-                st_folium(map,width=1000)
+                legend_html ="""
+                    <div style='
+                            position: fixed; 
+                            bottom: 100px; right: 40px; width: 200px; height: 200px; 
+                            background-color: white; 
+                            border:2px solid grey;
+                            right:60px;
+                            z-index:9999; 
+                            font-size:14px;
+                    '>
+                    <b>Légende</b>
+                    <div style='display:flex;'>
+                        <p style='color:purple'>---------</p>
+                        <p>Trajet de l'éléphant</p>
+                    </div>
+                    &nbsp;<p>Distance Total:<b> 150 Km</b></p>
+                 </div>"""
+                map.get_root().html.add_child(f.Element(legend_html))
+                map_html = map._repr_html_()
+                st.components.v1.html(map_html, height=1500)
             else:
                 map=f.Map(location=[df["Latitude"].astype(float).mean(),df["Longitude"].astype(float).mean()],zoom_start=10)
                 latitude=df["Latitude"].astype(float)
@@ -278,6 +307,29 @@ else:
                     f.Marker([dict_jour.tail(1)["Latitude"].values[0],dict_jour.tail(1)["Longitude"].values[0]],icon=icon2).add_to(map)
                     data_jour=list(zip(dict_jour["Latitude"].astype(float),dict_jour["Longitude"].astype(float)))
                     AntPath(data_jour,delay=1000,weight=3,color="white",dash_array=[10,20],pulse_color="green",reverse=True).add_to(map)
+                    legend_html=f"""
+                                <div style='
+                                        position: fixed; 
+                                        bottom: 100px; right: 40px; width: 300px; height: 150px; 
+                                        background-color: white; 
+                                        border:2px solid grey;
+                                        right:60px;
+                                        z-index:9999; 
+                                        font-size:14px;
+                                '>
+                                &nbsp;<b style='margin-bottom:250px'>Légende: {st.session_state['nom_elephant']}</b>
+                                <div style='display:flex;'>
+                                    <p style='color:green'>---------------</p>
+                                    <p>Trajet de nuit</p>
+                                </div>
+                                <div style="margin-left:30px">
+                                    <p>Du {df.tail(1)["Date_Enregistrement"].values[0]} au {df.head(1)["Date_Enregistrement"].values[0]}
+                                </div>
+                                <p>Distance totale:<b> {distance_jour} Km</b></p>
+                        </div>"""
+                    map.get_root().html.add_child(f.Element(legend_html))
+                    map_html=map._repr_html_()
+                    st.components.v1.html(map_html, height=1500)
                     st_folium(map,width=1000)
                 elif option_nuit_jour_select=="Nuit":
                     dict_nuit=dict_group_nuit_jour.get(("Nuit",))
@@ -285,19 +337,69 @@ else:
                     f.Marker([dict_nuit.tail(1)["Latitude"].values[0],dict_nuit.tail(1)["Longitude"].values[0]],icon=icon2).add_to(map)
                     data_nuit=list(zip(dict_nuit["Latitude"].astype(float),dict_nuit["Longitude"].astype(float)))
                     AntPath(data_nuit,delay=1000,weight=3,color="white",dash_array=[10,20],pulse_color="blue",reverse=True).add_to(map)
-                    st_folium(map,width=1000)
+                    legend_html=f"""
+                        <div style='
+                                position: fixed; 
+                                bottom: 100px; right: 40px; width: 300px; height: 150px; 
+                                background-color: white; 
+                                border:2px solid grey;
+                                right:60px;
+                                z-index:9999; 
+                                font-size:14px;
+                        '>
+                            &nbsp;<b style='margin-bottom:250px'>Légende: {st.session_state['nom_elephant']}</b>
+                            <div style='display:flex;'>
+                                <p style='color:blue'>---------------</p>
+                                <p>Trajet de nuit</p>
+                            </div>
+                            <div style="margin-left:30px">
+                                <p>Du {df.tail(1)["Date_Enregistrement"].values[0]} au {df.head(1)["Date_Enregistrement"].values[0]}
+                            </div>
+                            <p>Distance totale:<b> {distance_nuit} Km</b></p>
+                     </div>"""
+                    map.get_root().html.add_child(f.Element(legend_html))
+                    map_html=map._repr_html_()
+                    st.components.v1.html(map_html, height=1500)
                 else:
                     dict_jour=dict_group_nuit_jour.get(("Jour",))
                     data_jour=list(zip(dict_jour["Latitude"].astype(float),dict_jour["Longitude"].astype(float)))
                     dict_nuit=dict_group_nuit_jour.get(("Nuit",))
                     data_nuit=list(zip(dict_nuit["Latitude"].astype(float),dict_nuit["Longitude"].astype(float)))
                     icon=f.CustomIcon("image/elephant_marker.png",icon_size=(11,11))
-                    f.Marker([first_lat,first_long],icon=icon).add_to(map)
+                    f.Marker([first_lat,first_long],icon=icon,popup="Point d'arrivé").add_to(map)
                     icon1=f.CustomIcon("image/elephant_marker.png",icon_size=(11,11))
-                    f.Marker([last_lat,last_long],icon=icon1).add_to(map)
+                    f.Marker([last_lat,last_long],icon=icon1,popup="Point de départ ").add_to(map)
                     AntPath(data_jour,delay=1100,weight=3,color="white",dash_array=[20,30],pulse_color="green",reverse=True).add_to(map)
                     AntPath(data_nuit,delay=1100,weight=3,color="white",dash_array=[20,30],pulse_color="blue",reverse=True).add_to(map)
-                    st_folium(map,width=1000)
+                    legend_html =f"""
+                    <div style='
+                            position: fixed; 
+                            bottom: 100px; right: 40px; width: 350px; height: 200px; 
+                            background-color: white; 
+                            border:2px solid grey;
+                            right:60px;
+                            z-index:9999; 
+                            font-size:14px;
+                    '>
+                    &nbsp;<b style='margin-bottom:250px'>Légende: {st.session_state['nom_elephant']}</b>
+                    <div style='display:flex;'>
+                        <p style='color:blue'>---------------</p>
+                        <p>Trajet de nuit</p>
+                    </div>
+                    <div style='display:flex;'>
+                        <p style='color:green'>---------------</p>
+                        <p>Trajet de Jour</p>
+                    </div>
+                    <div style="margin-left:30px">
+                        <p>Du {df.tail(1)["Date_Enregistrement"].values[0]} au {df.head(1)["Date_Enregistrement"].values[0]}
+                    </div>
+                    <p>Distance total de Jour:<b> {distance_jour} Km</b></p>
+                    <p>Distance total de Nuit:<b> {distance_nuit} Km</b></p>
+                    <p>Distance Total:<b> {distance_total} Km</b></p>
+                 </div>"""
+                map.get_root().html.add_child(f.Element(legend_html))
+                map_html = map._repr_html_()
+                st.components.v1.html(map_html, height=1500)
 
             
 
