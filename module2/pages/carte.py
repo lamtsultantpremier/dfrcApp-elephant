@@ -173,11 +173,57 @@ else:
                         heatmap_max.add_to(heat_map)
                         heatmap_min.add_to(heat_map)
                         f.LayerControl().add_to(heat_map)
-                        st_folium(heat_map,width=1000)
-                        heat_map.save('carte_de_chaleur_claire.html')
-                        file_name='carte_de_chaleur_claire.html'
-                        nom_elephant=st.session_state['nom_elephant']
-                        generate_and_download_image_heatmap(file_name,nom_elephant)
+                        legend_html =f"""
+                            <div style='
+                                    position: fixed; 
+                                    bottom: 100px; right: 40px; width: 260px; height: 350px; 
+                                    background-color: white; 
+                                    border:2px solid grey;
+                                    right:60px;
+                                    z-index:9999; 
+                                    font-size:14px;
+                            '>
+                                    &nbsp;<b style='margin-bottom:250px'>Légende : Carte de chaleurs</b>
+                                    <div style="margin-left:30px;margin-top:20px">
+                                        <p>Du {df.tail(1)["Date_Enregistrement"].values[0]} au {df.head(1)["Date_Enregistrement"].values[0]}
+                                    </div>
+                                    <div style='display:flex;margin-bottom:10px'>
+                                        <div style='width:40px;heigth:10px;background:#4B7946;border:1px solid white;'>
+                                           <p></p>
+                                        </div>
+                                        &nbsp; Forêt classée
+                                    </div>
+                                    <div style='display:flex;margin-bottom:10px'>
+                                        <div style='width:40px;heigth:10px;background:#ACE5F3;border:1px solid white;'>
+                                           <p></p>
+                                        </div>
+                                        &nbsp; Plan d'eaux
+                                    </div>
+                                    &nbsp;<b style='margin-bottom:250px'>Aire de Présence</b>
+                                    <div>
+                                        <img src="data:image/png;base64,{base64.b64encode(open('image/aire_presence.png', 'rb').read()).decode('utf-8')}" width="190" height="20">
+                                        <div style='display:flex'>
+                                            <p style='margin-right:120px'>Faible</p>
+                                            <p>Eleve</p>
+                                        </div>
+                                    </div>
+                                    <div style='display:flex;'>
+                                        <img src="data:image/png;base64,{base64.b64encode(open('image/elephant_marker.png', 'rb').read()).decode('utf-8')}" width="20" height="20">
+                                        <b style='margin-left:20px'>{st.session_state["nom_elephant"]}</b>
+                                    </div>
+                                    <div style='display:flex;justify-content:center'>
+                                        <img src="data:image/png;base64,{base64.b64encode(open('image/minef.png', 'rb').read()).decode('utf-8')}" width="60" height="60">
+                                        <b  style='margin-top:15px'>DFRC</b>
+                                    </div>
+                            </div>"""
+                        heat_map.get_root().html.add_child(f.Element(legend_html))
+                        map_html = heat_map._repr_html_()
+                        st.components.v1.html(map_html, height=1500)
+                        #st_folium(heat_map,width=1000)
+                        #heat_map.save('carte_de_chaleur_claire.html')
+                        #file_name='carte_de_chaleur_claire.html'
+                        #nom_elephant=st.session_state['nom_elephant']
+                        #generate_and_download_image_heatmap(file_name,nom_elephant)
             elif cart_chaleur_selected=="Mode sombre":
                     epsilon=distance_dbscan(df)
                     if epsilon!=0.0:
