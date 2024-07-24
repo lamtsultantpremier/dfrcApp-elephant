@@ -17,6 +17,7 @@ import branca.colormap as cm
 from collections import defaultdict
 from streamlit.components.v1 import html
 from geopy.distance import geodesic
+import base64
 if "df" not in st.session_state:
     st.write("Veuillez Charger un fichier avant de continuer")
 else:
@@ -267,22 +268,45 @@ else:
                 icon2=f.CustomIcon("image/elephant_marker.png",icon_size=(11,11))
                 f.Marker([last_lat,last_long],icon=icon2).add_to(map)
                 AntPath(data,delay=400,weight=3,color="red",pulse_color="blue",dash_array=[50,60],reverse=True).add_to(map)
-                legend_html ="""
+                legend_html =f"""
                     <div style='
                             position: fixed; 
-                            bottom: 100px; right: 40px; width: 200px; height: 200px; 
+                            bottom: 100px; right: 40px; width: 260px; height: 250px; 
                             background-color: white; 
                             border:2px solid grey;
                             right:60px;
                             z-index:9999; 
                             font-size:14px;
                     '>
-                    <b>Légende</b>
+                    &nbsp;<b style='margin-bottom:250px'>Légende:</b>
                     <div style='display:flex;'>
-                        <p style='color:purple'>---------</p>
+                        <p style='color:purple'>---------------</p>
                         <p>Trajet de l'éléphant</p>
                     </div>
-                    &nbsp;<p>Distance Total:<b> 150 Km</b></p>
+                    <div style="margin-left:30px">
+                        <p>Du {df.tail(1)["Date_Enregistrement"].values[0]} au {df.head(1)["Date_Enregistrement"].values[0]}
+                    </div>
+                    <div style='display:flex;margin-bottom:10px'>
+                        <div style='width:40px;heigth:10px;background:#4B7946;border:1px solid white;'>
+                           <p></p>
+                        </div>
+                        &nbsp; Forêt classée
+                    </div>
+                    <div style='display:flex'>
+                        <div style='width:40px;heigth:10px;background:#ACE5F3;border:1px solid white;'>
+                           <p></p>
+                        </div>
+                        &nbsp; Plan d'eaux
+                    </div>
+                    <p>Distance Total:<b> {round(distance_total,5)} Km</b></p>
+                    <div style='display:flex;'>
+                        <img src="data:image/png;base64,{base64.b64encode(open('image/elephant_marker.png', 'rb').read()).decode('utf-8')}" width="20" height="20">
+                        <b style='margin-left:20px'>{st.session_state["nom_elephant"]}</b>
+                    </div>
+                    <div style='display:flex;justify-content:center'>
+                        <img src="data:image/png;base64,{base64.b64encode(open('image/minef.png', 'rb').read()).decode('utf-8')}" width="60" height="60">
+                       
+                    </div>
                  </div>"""
                 map.get_root().html.add_child(f.Element(legend_html))
                 map_html = map._repr_html_()
@@ -307,26 +331,44 @@ else:
                     f.Marker([dict_jour.tail(1)["Latitude"].values[0],dict_jour.tail(1)["Longitude"].values[0]],icon=icon2).add_to(map)
                     data_jour=list(zip(dict_jour["Latitude"].astype(float),dict_jour["Longitude"].astype(float)))
                     AntPath(data_jour,delay=1000,weight=3,color="white",dash_array=[10,20],pulse_color="green",reverse=True).add_to(map)
-                    legend_html=f"""
-                                <div style='
-                                        position: fixed; 
-                                        bottom: 100px; right: 40px; width: 300px; height: 150px; 
-                                        background-color: white; 
-                                        border:2px solid grey;
-                                        right:60px;
-                                        z-index:9999; 
-                                        font-size:14px;
-                                '>
-                                &nbsp;<b style='margin-bottom:250px'>Légende: {st.session_state['nom_elephant']}</b>
-                                <div style='display:flex;'>
-                                    <p style='color:green'>---------------</p>
-                                    <p>Trajet de nuit</p>
-                                </div>
-                                <div style="margin-left:30px">
-                                    <p>Du {df.tail(1)["Date_Enregistrement"].values[0]} au {df.head(1)["Date_Enregistrement"].values[0]}
-                                </div>
-                                <p>Distance totale:<b> {distance_jour} Km</b></p>
-                        </div>"""
+                    legend_html =f"""
+                    <div style='
+                                position: fixed; 
+                                bottom: 100px; right: 40px; width: 260px; height: 250px; 
+                                background-color: white; +
+                                right:60px;
+                                z-index:9999; 
+                                font-size:14px;
+                        '>
+                        &nbsp;<b style='margin-bottom:250px'>Légende</b>
+                        <div style='display:flex;'>
+                            <p style='color:green'>---------------</p>
+                            <p>Trajet de Jour</p>
+                        </div>
+                        <div style="margin-left:30px">
+                            <p>Du {df.tail(1)["Date_Enregistrement"].values[0]} au {df.head(1)["Date_Enregistrement"].values[0]}
+                        </div>
+                        <div style='display:flex;margin-bottom:10px'>
+                            <div style='width:40px;heigth:10px;background:#4B7946;border:1px solid white;'>
+                               <p></p>
+                            </div>
+                            &nbsp; Forêt classée
+                        </div>
+                        <div style='display:flex'>
+                            <div style='width:40px;heigth:10px;background:#ACE5F3;border:1px solid white;'>
+                               <p></p>
+                            </div>
+                            &nbsp; Plan d'eaux
+                        </div>
+                        <p>Distance total de Jour:<b> {round(distance_jour,5)} Km</b></p>
+                        <div style='display:flex;'>
+                            <img src="data:image/png;base64,{base64.b64encode(open('image/elephant_marker.png', 'rb').read()).decode('utf-8')}" width="20" height="20">
+                            <b style='margin-left:20px'>{st.session_state["nom_elephant"]}</b>
+                        </div>
+                        <div style='display:flex;justify-content:center'>
+                            <img src="data:image/png;base64,{base64.b64encode(open('image/minef.png', 'rb').read()).decode('utf-8')}" width="60" height="60">
+                        </div>
+                 </div>"""
                     map.get_root().html.add_child(f.Element(legend_html))
                     map_html=map._repr_html_()
                     st.components.v1.html(map_html, height=1500)
@@ -337,26 +379,46 @@ else:
                     f.Marker([dict_nuit.tail(1)["Latitude"].values[0],dict_nuit.tail(1)["Longitude"].values[0]],icon=icon2).add_to(map)
                     data_nuit=list(zip(dict_nuit["Latitude"].astype(float),dict_nuit["Longitude"].astype(float)))
                     AntPath(data_nuit,delay=1000,weight=3,color="white",dash_array=[10,20],pulse_color="blue",reverse=True).add_to(map)
-                    legend_html=f"""
-                        <div style='
-                                position: fixed; 
-                                bottom: 100px; right: 40px; width: 300px; height: 150px; 
+                    legend_html =f"""
+                    <div style='
+                            position: fixed; 
+                                bottom: 100px; right: 40px; width: 260px; height: 250px; 
                                 background-color: white; 
                                 border:2px solid grey;
                                 right:60px;
                                 z-index:9999; 
                                 font-size:14px;
                         '>
-                            &nbsp;<b style='margin-bottom:250px'>Légende: {st.session_state['nom_elephant']}</b>
-                            <div style='display:flex;'>
-                                <p style='color:blue'>---------------</p>
-                                <p>Trajet de nuit</p>
+                        &nbsp;<b style='margin-bottom:250px'>Légende</b>
+                        <div style='display:flex;'>
+                            <p style='color:blue'>---------------</p>
+                            <p>Trajet de nuit</p>
+                        </div>
+                        <div style="margin-left:30px">
+                            <p>Du {df.tail(1)["Date_Enregistrement"].values[0]} au {df.head(1)["Date_Enregistrement"].values[0]}
+                        </div>
+                        <div style='display:flex;margin-bottom:10px'>
+                            <div style='width:40px;heigth:10px;background:#4B7946;border:1px solid white;'>
+                               <p></p>
                             </div>
-                            <div style="margin-left:30px">
-                                <p>Du {df.tail(1)["Date_Enregistrement"].values[0]} au {df.head(1)["Date_Enregistrement"].values[0]}
+                            &nbsp; Forêt classée
+                        </div>
+                        <div style='display:flex'>
+                            <div style='width:40px;heigth:10px;background:#ACE5F3;border:1px solid white;'>
+                               <p></p>
                             </div>
-                            <p>Distance totale:<b> {distance_nuit} Km</b></p>
-                     </div>"""
+                            &nbsp; Plan d'eaux
+                        </div>
+                        <p>Distance total de Nuit:<b> {round(distance_nuit,5)} Km</b></p>
+                        <div style='display:flex;'>
+                            <img src="data:image/png;base64,{base64.b64encode(open('image/elephant_marker.png', 'rb').read()).decode('utf-8')}" width="20" height="20">
+                            <b style='margin-left:20px'>{st.session_state["nom_elephant"]}</b>
+                        </div>
+                        <div style='display:flex;justify-content:center'>
+                            <img src="data:image/png;base64,{base64.b64encode(open('image/minef.png', 'rb').read()).decode('utf-8')}" width="60" height="60">   
+                        </div>
+
+                 </div>"""
                     map.get_root().html.add_child(f.Element(legend_html))
                     map_html=map._repr_html_()
                     st.components.v1.html(map_html, height=1500)
@@ -374,14 +436,14 @@ else:
                     legend_html =f"""
                     <div style='
                             position: fixed; 
-                            bottom: 100px; right: 40px; width: 350px; height: 200px; 
+                            bottom: 100px; right: 40px; width: 260px; height: 350px; 
                             background-color: white; 
                             border:2px solid grey;
                             right:60px;
                             z-index:9999; 
                             font-size:14px;
                     '>
-                    &nbsp;<b style='margin-bottom:250px'>Légende: {st.session_state['nom_elephant']}</b>
+                    &nbsp;<b style='margin-bottom:250px'>Légende</b>
                     <div style='display:flex;'>
                         <p style='color:blue'>---------------</p>
                         <p>Trajet de nuit</p>
@@ -393,14 +455,32 @@ else:
                     <div style="margin-left:30px">
                         <p>Du {df.tail(1)["Date_Enregistrement"].values[0]} au {df.head(1)["Date_Enregistrement"].values[0]}
                     </div>
-                    <p>Distance total de Jour:<b> {distance_jour} Km</b></p>
-                    <p>Distance total de Nuit:<b> {distance_nuit} Km</b></p>
-                    <p>Distance Total:<b> {distance_total} Km</b></p>
+                    <div style='display:flex;margin-bottom:10px'>
+                        <div style='width:40px;heigth:10px;background:#4B7946;border:1px solid white;'>
+                           <p></p>
+                        </div>
+                        &nbsp; Forêt classée
+                    </div>
+                    <div style='display:flex'>
+                        <div style='width:40px;heigth:10px;background:#ACE5F3;border:1px solid white;'>
+                           <p></p>
+                        </div>
+                        &nbsp; Plan d'eaux
+                    </div>
+                    <p>Distance total de Jour:<b> {round(distance_jour,5)} Km</b></p>
+                    <p>Distance total de Nuit:<b> {round(distance_nuit,5)} Km</b></p>
+                    <p>Distance Total:<b> {round(distance_total,5)} Km</b></p>
+                    <div style='display:flex;'>
+                        <img src="data:image/png;base64,{base64.b64encode(open('image/elephant_marker.png', 'rb').read()).decode('utf-8')}" width="20" height="20">
+                        <b style='margin-left:20px'>{st.session_state["nom_elephant"]}</b>
+                    </div>
+                    <div style='display:flex;justify-content:center'>
+                            <img src="data:image/png;base64,{base64.b64encode(open('image/minef.png', 'rb').read()).decode('utf-8')}" width="60" height="60">   
+                        </div>
                  </div>"""
                 map.get_root().html.add_child(f.Element(legend_html))
                 map_html = map._repr_html_()
                 st.components.v1.html(map_html, height=1500)
-
             
 
 
