@@ -109,7 +109,7 @@ def generate_and_download_image():
                 data=file,
                 file_name="zone_frequentation.png",
                 mime="image/png")
-def generate_and_download_image_heatmap(nom_fichier,nom_elephant):
+def generate_and_download_image_heatmap(nom_fichier,titre):
     file_name=nom_fichier
     options=webdriver.ChromeOptions()
     options.add_argument("--headless")
@@ -123,8 +123,8 @@ def generate_and_download_image_heatmap(nom_fichier,nom_elephant):
     driver.quit()
     image_path="carte_de_chaleur.png"
     with open(image_path,"rb") as file:
-            btn=st.download_button(
-                label="Telecharger la Carte",
+            st.download_button(
+                label="Telecharger",
                 data=file,
-                file_name=f"{nom_elephant}_heatMap.png",
+                file_name=f"{titre}_heatMap.png",
                 mime="image/png")

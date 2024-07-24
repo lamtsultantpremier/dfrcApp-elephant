@@ -132,6 +132,9 @@ else:
             if cart_chaleur_selected=="Mode claire":
                     epsilon=distance_dbscan(df)
                     if epsilon!=0.0:
+                        file_path=os.path.abspath("heat_map_mode_claire.html")
+                        if st.button("Telechargr la carte"):
+                            generate_and_download_image_heatmap(file_path,"heat_map_mode_claire")
                         df_cluster=make_cluster(df,epsilon)
                         heat_map=f.Map(location=[df_cluster["Latitude"].mean(),df_cluster["Longitude"].mean()],zoom_start=9)
                         max_heat=df_cluster["cluster"].max()
@@ -147,31 +150,6 @@ else:
                         heatmap_max.add_to(heat_map)
                         heatmap_min.add_to(heat_map)
                         #f.TileLayer('cartodbdark_matter').add_to(heat_map)
-                        f.LayerControl().add_to(heat_map)
-                        st_folium(heat_map,width=1000)
-                        heat_map.save('carte_de_chaleur_claire.html')
-                        file_name='carte_de_chaleur_claire.html'
-                        nom_elephant=st.session_state['nom_elephant']
-                        generate_and_download_image_heatmap(file_name,nom_elephant)
-                    else:
-                        df_cluster=make_cluster(df,0.02)
-                        df_cluster['Latitude']=df_cluster['Latitude'].astype(float)
-                        df_cluster['Longitude']=df_cluster['Longitude'].astype(float)
-                        df['cluster']=df_cluster['cluster'].astype(int)
-                        heat_map=f.Map(location=[df_cluster["Latitude"].mean(),df_cluster["Longitude"].mean()],zoom_start=9)
-                        max_heat=df_cluster["cluster"].max().astype(int)
-                        min_heat=df_cluster["cluster"].min().astype(int)
-                        heatmap_data_max=[
-                            [row["Latitude"],row["Longitude"],int(max_heat)] for index,row in df_cluster.iterrows()
-                        ]
-                        heatmap_data_min=[
-                            [row["Latitude"],row["Longitude"],int(min_heat)] for index,row in df_cluster.iterrows()
-                        ]
-                        gradient_map=defaultdict(dict)
-                        heatmap_max=HeatMap(heatmap_data_max,name="Eleve")
-                        heatmap_min=HeatMap(heatmap_data_min,name="Faible")
-                        heatmap_max.add_to(heat_map)
-                        heatmap_min.add_to(heat_map)
                         f.LayerControl().add_to(heat_map)
                         legend_html =f"""
                             <div style='
@@ -217,6 +195,81 @@ else:
                                     </div>
                             </div>"""
                         heat_map.get_root().html.add_child(f.Element(legend_html))
+                        map.save("heat_map_mode_claire.html")
+                        map_html = heat_map._repr_html_()
+                        st.components.v1.html(map_html, height=1500)
+                        #st_folium(heat_map,width=1000)
+                        #heat_map.save('carte_de_chaleur_claire.html')
+                        #file_name='carte_de_chaleur_claire.html'
+                        #nom_elephant=st.session_state['nom_elephant']
+                        #generate_and_download_image_heatmap(file_name,nom_elephant)
+                    else:
+                        file_path=os.path.abspath("heat_map_mode_claire.html")
+                        if st.button("Telecharger la carte des chaleurs"):
+                            generate_and_download_image_heatmap(file_path,"heat_map_mode_claire.png")
+                        df_cluster=make_cluster(df,0.02)
+                        df_cluster['Latitude']=df_cluster['Latitude'].astype(float)
+                        df_cluster['Longitude']=df_cluster['Longitude'].astype(float)
+                        df['cluster']=df_cluster['cluster'].astype(int)
+                        heat_map=f.Map(location=[df_cluster["Latitude"].mean(),df_cluster["Longitude"].mean()],zoom_start=9)
+                        max_heat=df_cluster["cluster"].max().astype(int)
+                        min_heat=df_cluster["cluster"].min().astype(int)
+                        heatmap_data_max=[
+                            [row["Latitude"],row["Longitude"],int(max_heat)] for index,row in df_cluster.iterrows()
+                        ]
+                        heatmap_data_min=[
+                            [row["Latitude"],row["Longitude"],int(min_heat)] for index,row in df_cluster.iterrows()
+                        ]
+                        gradient_map=defaultdict(dict)
+                        heatmap_max=HeatMap(heatmap_data_max,name="Eleve")
+                        heatmap_min=HeatMap(heatmap_data_min,name="Faible")
+                        heatmap_max.add_to(heat_map)
+                        heatmap_min.add_to(heat_map)
+                        f.LayerControl().add_to(heat_map)
+                        legend_html =f"""
+                            <div style='
+                                    position: fixed; 
+                                    bottom: 100px; width: 260px; height: 350px; 
+                                    background-color: white; 
+                                    border:2px solid grey;
+                                    z-index:9999; 
+                                    font-size:14px;
+                            '>
+                                    &nbsp;<b style='margin-bottom:250px'>Légende : Carte de chaleurs</b>
+                                    <div style="margin-left:30px;margin-top:20px">
+                                        <p>Du {df.tail(1)["Date_Enregistrement"].values[0]} au {df.head(1)["Date_Enregistrement"].values[0]}
+                                    </div>
+                                    <div style='display:flex;margin-bottom:10px'>
+                                        <div style='width:40px;heigth:10px;background:#4B7946;border:1px solid white;'>
+                                           <p></p>
+                                        </div>
+                                        &nbsp; Forêt classée
+                                    </div>
+                                    <div style='display:flex;margin-bottom:10px'>
+                                        <div style='width:40px;heigth:10px;background:#ACE5F3;border:1px solid white;'>
+                                           <p></p>
+                                        </div>
+                                        &nbsp; Plan d'eaux
+                                    </div>
+                                    &nbsp;<b style='margin-bottom:250px'>Aire de Présence</b>
+                                    <div>
+                                        <img src="data:image/png;base64,{base64.b64encode(open('image/aire_presence.png', 'rb').read()).decode('utf-8')}" width="190" height="20">
+                                        <div style='display:flex'>
+                                            <p style='margin-right:120px'>Faible</p>
+                                            <p>Eleve</p>
+                                        </div>
+                                    </div>
+                                    <div style='display:flex;'>
+                                        <img src="data:image/png;base64,{base64.b64encode(open('image/elephant_marker.png', 'rb').read()).decode('utf-8')}" width="20" height="20">
+                                        <b style='margin-left:20px'>{st.session_state["nom_elephant"]}</b>
+                                    </div>
+                                    <div style='display:flex;justify-content:center'>
+                                        <img src="data:image/png;base64,{base64.b64encode(open('image/minef.png', 'rb').read()).decode('utf-8')}" width="60" height="60">
+                                        <b  style='margin-top:15px'>DFRC</b>
+                                    </div>
+                            </div>"""
+                        heat_map.get_root().html.add_child(f.Element(legend_html))
+                        heat_map.save("heat_map_mode_claire.html")
                         map_html = heat_map._repr_html_()
                         st.components.v1.html(map_html, height=1500)
                         #st_folium(heat_map,width=1000)
@@ -227,6 +280,9 @@ else:
             elif cart_chaleur_selected=="Mode sombre":
                     epsilon=distance_dbscan(df)
                     if epsilon!=0.0:
+                        file_path=os.path.abspath("heat_map_mode_sombre.html")
+                        if st.button("Télécharger la carte des chaleurs"):
+                            generate_and_download_image_heatmap(file_path,"heat_map_mode_sombre")
                         df_cluster=make_cluster(df,epsilon)
                         heat_map=f.Map(location=[df_cluster["Latitude"].mean(),df_cluster["Longitude"].mean()],tiles='cartodbdark_matter',zoom_start=9)
                         max_heat=df_cluster["cluster"].max()
@@ -242,12 +298,61 @@ else:
                         heatmap_max.add_to(heat_map)
                         heatmap_min.add_to(heat_map)
                         f.LayerControl().add_to(heat_map)
-                        st_folium(heat_map,width=1000)
-                        heat_map.save('carte_de_chaleur_sombre.html')
-                        file_name='carte_de_chaleur_sombre.html'
-                        nom_elephant=st.session_state['nom_elephant']
-                        generate_and_download_image_heatmap(file_name,nom_elephant)
+                        legend_html =f"""
+                            <div style='
+                                    position: fixed; 
+                                    bottom: 100px; width: 260px; height: 350px; 
+                                    background-color: white; 
+                                    border:2px solid grey;
+                                    z-index:9999; 
+                                    font-size:14px;
+                            '>
+                                    &nbsp;<b style='margin-bottom:250px'>Légende : Carte de chaleurs</b>
+                                    <div style="margin-left:30px;margin-top:20px">
+                                        <p>Du {df.tail(1)["Date_Enregistrement"].values[0]} au {df.head(1)["Date_Enregistrement"].values[0]}
+                                    </div>
+                                    <div style='display:flex;margin-bottom:10px'>
+                                        <div style='width:40px;heigth:10px;background:#4B7946;border:1px solid white;'>
+                                           <p></p>
+                                        </div>
+                                        &nbsp; Forêt classée
+                                    </div>
+                                    <div style='display:flex;margin-bottom:10px'>
+                                        <div style='width:40px;heigth:10px;background:#ACE5F3;border:1px solid white;'>
+                                           <p></p>
+                                        </div>
+                                        &nbsp; Plan d'eaux
+                                    </div>
+                                    &nbsp;<b style='margin-bottom:250px'>Aire de Présence</b>
+                                    <div>
+                                        <img src="data:image/png;base64,{base64.b64encode(open('image/aire_presence.png', 'rb').read()).decode('utf-8')}" width="190" height="20">
+                                        <div style='display:flex'>
+                                            <p style='margin-right:120px'>Faible</p>
+                                            <p>Eleve</p>
+                                        </div>
+                                    </div>
+                                    <div style='display:flex;'>
+                                        <img src="data:image/png;base64,{base64.b64encode(open('image/elephant_marker.png', 'rb').read()).decode('utf-8')}" width="20" height="20">
+                                        <b style='margin-left:20px'>{st.session_state["nom_elephant"]}</b>
+                                    </div>
+                                    <div style='display:flex;justify-content:center'>
+                                        <img src="data:image/png;base64,{base64.b64encode(open('image/minef.png', 'rb').read()).decode('utf-8')}" width="60" height="60">
+                                        <b  style='margin-top:15px'>DFRC</b>
+                                    </div>
+                            </div>"""
+                        heat_map.get_root().html.add_child(f.Element(legend_html))
+                        heat_map.save("heat_map_mode_sombre.html")
+                        map_html = heat_map._repr_html_()
+                        st.components.v1.html(map_html, height=1500)
+                        #st_folium(heat_map,width=1000)
+                        #heat_map.save('carte_de_chaleur_sombre.html')
+                        #file_name='carte_de_chaleur_sombre.html'
+                        #nom_elephant=st.session_state['nom_elephant']
+                        #generate_and_download_image_heatmap(file_name,nom_elephant)
                     else:
+                        file_path=os.path.abspath("heat_map_mode_sombre.html")
+                        if st.button("Telecharger la carte des chaleurs"):
+                            generate_and_download_image_heatmap(file_path,"heatmap_mode_sombre")
                         df_cluster=make_cluster(df,0.02)
                         df_cluster['Latitude']=df_cluster['Latitude'].astype(float)
                         df_cluster['Longitude']=df_cluster['Longitude'].astype(float)
@@ -267,16 +372,62 @@ else:
                         heatmap_max.add_to(heat_map)
                         heatmap_min.add_to(heat_map)
                         f.LayerControl().add_to(heat_map)
-                        st_folium(heat_map,width=1000)
-                        heat_map.save('carte_de_chaleur_sombre.html')
-                        file_name='carte_de_chaleur_sombre.html'
-                        nom_elephant=st.session_state['nom_elephant']
-                        generate_and_download_image_heatmap(file_name,nom_elephant)
+                        legend_html =f"""
+                            <div style='
+                                    position: fixed; 
+                                    bottom: 100px;width: 260px; height: 350px; 
+                                    background-color: white; 
+                                    border:2px solid grey;
+                                    z-index:9999; 
+                                    font-size:14px;
+                            '>
+                                    &nbsp;<b style='margin-bottom:250px'>Légende : Carte de chaleurs</b>
+                                    <div style="margin-left:30px;margin-top:20px">
+                                        <p>Du {df.tail(1)["Date_Enregistrement"].values[0]} au {df.head(1)["Date_Enregistrement"].values[0]}
+                                    </div>
+                                    <div style='display:flex;margin-bottom:10px'>
+                                        <div style='width:40px;heigth:10px;background:#4B7946;border:1px solid white;'>
+                                           <p></p>
+                                        </div>
+                                        &nbsp; Forêt classée
+                                    </div>
+                                    <div style='display:flex;margin-bottom:10px'>
+                                        <div style='width:40px;heigth:10px;background:#ACE5F3;border:1px solid white;'>
+                                           <p></p>
+                                        </div>
+                                        &nbsp; Plan d'eaux
+                                    </div>
+                                    &nbsp;<b style='margin-bottom:250px'>Aire de Présence</b>
+                                    <div>
+                                        <img src="data:image/png;base64,{base64.b64encode(open('image/aire_presence.png', 'rb').read()).decode('utf-8')}" width="190" height="20">
+                                        <div style='display:flex'>
+                                            <p style='margin-right:120px'>Faible</p>
+                                            <p>Eleve</p>
+                                        </div>
+                                    </div>
+                                    <div style='display:flex;'>
+                                        <img src="data:image/png;base64,{base64.b64encode(open('image/elephant_marker.png', 'rb').read()).decode('utf-8')}" width="20" height="20">
+                                        <b style='margin-left:20px'>{st.session_state["nom_elephant"]}</b>
+                                    </div>
+                                    <div style='display:flex;justify-content:center'>
+                                        <img src="data:image/png;base64,{base64.b64encode(open('image/minef.png', 'rb').read()).decode('utf-8')}" width="60" height="60">
+                                        <b  style='margin-top:15px'>DFRC</b>
+                                    </div>
+                            </div>"""
+                        heat_map.get_root().html.add_child(f.Element(legend_html))
+                        heat_map.save("heat_map_mode_sombre.html")
+                        map_html = heat_map._repr_html_()
+                        st.components.v1.html(map_html, height=1800)
+                        #st_folium(heat_map,width=1000)
+                        #heat_map.save('carte_de_chaleur_sombre.html')
+                        #file_name='carte_de_chaleur_sombre.html'
+                        #nom_elephant=st.session_state['nom_elephant']
+                        #generate_and_download_image_heatmap(file_name,nom_elephant)
         elif carte_selected=="liste des Points":
             data_display=df[["Longitude","Latitude","Date_Enregistrement","Heure_Enregistrement","temps"]]
             st.subheader("Données cartographiques")
             st.text(f"Nom Elephant:{st.session_state["nom_elephant"]}")
-            st.text(f"Nombre de données {len(df)}")
+            st.text(f"Nombre de Position géographique: {len(df)}")
             st.text(f"Date debut: {df.tail(1)["Date_Enregistrement"].values[0]}")
             st.text(f"Date Fin: {df.head(1)["Date_Enregistrement"].values[0]}")
             st.dataframe(data_display)
@@ -301,6 +452,10 @@ else:
             options_map=["Afficher tous les déplacements","Afficher les déplacements de Nuit et Jour"]
             map_selected=st.radio("",options_map,horizontal=True)
             if map_selected=="Afficher tous les déplacements":
+                file_path=os.path.abspath("deplacement_total.html")
+                contenue_fichier=""
+                if st.button("Cliquez ici pour telecharger la carte"):
+                    generate_and_download_image_heatmap(file_path,"deplacement_total")
                 map=f.Map(location=[df["Latitude"].astype(float).mean(),df["Longitude"].astype(float).mean()],zoom_start=9)
                 latitude=df["Latitude"].astype(float)
                 longitude=df["Longitude"].astype(float)
@@ -310,9 +465,9 @@ else:
                 last_long=df["Longitude"].tail(1).values[0]
                 data=list(zip(latitude,longitude))
                 icon=f.CustomIcon("image/elephant_marker.png",icon_size=(11,11))
-                f.Marker([first_lat,first_long],icon=icon).add_to(map)
+                f.Marker([first_lat,first_long],icon=icon,popup="Point de Depart").add_to(map)
                 icon2=f.CustomIcon("image/elephant_marker.png",icon_size=(11,11))
-                f.Marker([last_lat,last_long],icon=icon2).add_to(map)
+                f.Marker([last_lat,last_long],icon=icon2,popup="Point d'arrivé").add_to(map)
                 AntPath(data,delay=400,weight=3,color="red",pulse_color="blue",dash_array=[50,60],reverse=True).add_to(map)
                 legend_html =f"""
                     <div style='
@@ -355,6 +510,7 @@ else:
                     </div>
                  </div>"""
                 map.get_root().html.add_child(f.Element(legend_html))
+                map.save("deplacement_total.html")
                 map_html = map._repr_html_()
                 st.components.v1.html(map_html, height=1500)
             else:
@@ -372,6 +528,9 @@ else:
                 option_nuit_jour=["Nuit","Jour","Nuit et Jour"]
                 option_nuit_jour_select=st.radio("",option_nuit_jour,horizontal=True)
                 if option_nuit_jour_select=="Jour":
+                    file_name=os.path.abspath("deplacement_de_jour.html")
+                    if st.button("Telecharger la carte"):
+                        generate_and_download_image_heatmap(file_name,"deplacement_de_jour")
                     dict_jour=dict_group_nuit_jour.get(("Jour",))
                     f.Marker([dict_jour.head(1)["Latitude"].values[0],dict_jour.head(1)["Longitude"].values[0]],icon=icon1).add_to(map)
                     f.Marker([dict_jour.tail(1)["Latitude"].values[0],dict_jour.tail(1)["Longitude"].values[0]],icon=icon2).add_to(map)
@@ -380,7 +539,7 @@ else:
                     legend_html =f"""
                     <div style='
                                 position: fixed; 
-                                bottom: 100px; right: 40px; width: 260px; height: 250px; 
+                                bottom: 100px; right: 20px; width: 260px; height: 250px; 
                                 background-color: white; +
                                 right:60px;
                                 z-index:9999; 
@@ -416,22 +575,26 @@ else:
                         </div>
                  </div>"""
                     map.get_root().html.add_child(f.Element(legend_html))
+                    map.save("deplacement_de_jour.html")
                     map_html=map._repr_html_()
                     st.components.v1.html(map_html, height=1500)
-                    st_folium(map,width=1000)
+                    #st_folium(map,width=1000)
                 elif option_nuit_jour_select=="Nuit":
+                    file_path=os.path.abspath('deplacement_nuit.html')
+                    if st.button("Telecharger la carte"):
+                        generate_and_download_image_heatmap(file_path,"deplacement de Nuit")
                     dict_nuit=dict_group_nuit_jour.get(("Nuit",))
-                    f.Marker([dict_nuit.head(1)["Latitude"].values[0],dict_nuit.head(1)["Longitude"].values[0]],icon=icon1).add_to(map)
-                    f.Marker([dict_nuit.tail(1)["Latitude"].values[0],dict_nuit.tail(1)["Longitude"].values[0]],icon=icon2).add_to(map)
+                    f.Marker([dict_nuit.head(1)["Latitude"].values[0],dict_nuit.head(1)["Longitude"].values[0]],icon=icon1,popup="Point départ").add_to(map)
+                    f.Marker([dict_nuit.tail(1)["Latitude"].values[0],dict_nuit.tail(1)["Longitude"].values[0]],icon=icon2,popup="Point d'arrivée").add_to(map)
                     data_nuit=list(zip(dict_nuit["Latitude"].astype(float),dict_nuit["Longitude"].astype(float)))
                     AntPath(data_nuit,delay=1000,weight=3,color="white",dash_array=[10,20],pulse_color="blue",reverse=True).add_to(map)
                     legend_html =f"""
                     <div style='
                             position: fixed; 
-                                bottom: 100px; right: 40px; width: 260px; height: 250px; 
+                                bottom: 100px; width: 260px; height: 250px; 
                                 background-color: white; 
                                 border:2px solid grey;
-                                right:60px;
+                                right:40px;
                                 z-index:9999; 
                                 font-size:14px;
                         '>
@@ -466,26 +629,30 @@ else:
 
                  </div>"""
                     map.get_root().html.add_child(f.Element(legend_html))
+                    map.save("deplacement_nuit.html")
                     map_html=map._repr_html_()
                     st.components.v1.html(map_html, height=1500)
                 else:
+                    file_path=os.path.abspath("deplacement_jour_nuit.html")
+                    if st.button("Telecharger la carte"):
+                        generate_and_download_image_heatmap(file_path,"deplacement_jour_nuit")
                     dict_jour=dict_group_nuit_jour.get(("Jour",))
                     data_jour=list(zip(dict_jour["Latitude"].astype(float),dict_jour["Longitude"].astype(float)))
                     dict_nuit=dict_group_nuit_jour.get(("Nuit",))
                     data_nuit=list(zip(dict_nuit["Latitude"].astype(float),dict_nuit["Longitude"].astype(float)))
                     icon=f.CustomIcon("image/elephant_marker.png",icon_size=(11,11))
-                    f.Marker([first_lat,first_long],icon=icon,popup="Point d'arrivé").add_to(map)
+                    f.Marker([first_lat,first_long],icon=icon,popup="Point départ").add_to(map)
                     icon1=f.CustomIcon("image/elephant_marker.png",icon_size=(11,11))
-                    f.Marker([last_lat,last_long],icon=icon1,popup="Point de départ ").add_to(map)
+                    f.Marker([last_lat,last_long],icon=icon1,popup="Point d'arrivé ").add_to(map)
                     AntPath(data_jour,delay=1100,weight=3,color="white",dash_array=[20,30],pulse_color="green",reverse=True).add_to(map)
                     AntPath(data_nuit,delay=1100,weight=3,color="white",dash_array=[20,30],pulse_color="blue",reverse=True).add_to(map)
                     legend_html =f"""
                     <div style='
                             position: fixed; 
-                            bottom: 100px; right: 40px; width: 260px; height: 350px; 
+                            bottom: 100px; width: 260px; height: 350px; 
                             background-color: white; 
                             border:2px solid grey;
-                            right:60px;
+                            right:20px;
                             z-index:9999; 
                             font-size:14px;
                     '>
@@ -525,6 +692,7 @@ else:
                         </div>
                  </div>"""
                 map.get_root().html.add_child(f.Element(legend_html))
+                map.save("deplacement_jour_nuit.html")
                 map_html = map._repr_html_()
                 st.components.v1.html(map_html, height=1500)
             
