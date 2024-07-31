@@ -91,14 +91,14 @@ if uploaded_file is not None:
         st.session_state["taille_fichier"]=taille_fichier
         chemin_fichier=Path(rep_par_defaut,nom_fichier)
         st.session_state['chemin_fichier']=chemin_fichier
-        with open(chemin_fichier,mode="wb") as f:
+        """with open(chemin_fichier,mode="wb") as f:
             f.write(uploaded_file.getbuffer())
             #Reinitialiser les variables nuit et jours
             st.session_state["nuit2"]=None
             st.session_state["nuit1"]=None
             st.session_state["jour1"]=None
             st.session_state["jour2"]=None
-            #Reinitialiser les variables nuit et jours
+            #Reinitialiser les variables nuit et jours"""
 if "nom_fichier" in st.session_state and "type_fichier" in st.session_state and "taille_fichier" in st.session_state:
         st.write(f"Nom du Fichier : {st.session_state['nom_fichier']}")
         st.write(f"Type de fichier : {st.session_state['type_fichier']}")
