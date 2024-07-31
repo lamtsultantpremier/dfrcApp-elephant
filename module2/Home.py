@@ -105,7 +105,7 @@ if "chemin_fichier" in st.session_state:
     st.session_state["nom_elephant"]=nom_elephant
 with st.sidebar:
     st.header('Navigation')
-    st.image("image/elephant.png")
+    st.image("/image/elephant.png")
     infos=st.selectbox("Pattern de Mouvement",["Vitesse de déplacement","Distance parcourue"],index=None,placeholder='choisir une action')
     st.title("")#
     st.title("")
