@@ -109,7 +109,7 @@ with st.sidebar:
     infos=st.selectbox("Pattern de Mouvement",["Vitesse de déplacement","Distance parcourue"],index=None,placeholder='choisir une action')
     st.title("")#
     st.title("")
-    st.image("./image/minef.png")
+    st.image("minef.png")
     #st.selectbox("Dynamique de Mouvement",["Direction Geographique","Trajectoire Dominante"])
     #st.title("")
     #st.selectbox("Temps Passé à différents endroits",["Temps de marche","Temps de repos"])
