@@ -9,4 +9,5 @@ requests
 selenium
 branca
 geopy
-scikit-learn 
+scikit-learn
+local
