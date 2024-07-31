@@ -9,5 +9,4 @@ requests
 selenium
 branca
 geopy
-math
 scikit-learn 
