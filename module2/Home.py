@@ -339,7 +339,7 @@ elif infos=="Vitesse de déplacement":
         first_dataframe=df_vitesse.sort_values("index",ascending=False).head(1)
         last_date=first_dataframe["index"].values[0]
         last_vitesse=round(first_dataframe["vitesse"].values[0],5)
-        st.text(f"La vitesse parcourue la dernière fois c'est à dire {last_date.strftime("%d/%m/%Y")}")
+        st.text(f"La vitesse parcourue la dernière fois c'est à dire {last_date.strftime('%d-%m-%Y')}")
         st.dataframe(first_dataframe)
         col1,col2,col3=st.columns(3)
         with col2:
